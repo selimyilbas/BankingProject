@@ -1,0 +1,153 @@
+.vakifbank-header {
+    background-color: var(--vakifbank-yellow);
+    height: 60px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  .header-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .header-left {
+    flex: 0 0 200px;
+  }
+  
+  .logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--vakifbank-black);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .logo i {
+    font-size: 28px;
+  }
+  
+  .header-center {
+    flex: 1;
+    max-width: 500px;
+    margin: 0 20px;
+  }
+  
+  .search-box {
+    position: relative;
+    width: 100%;
+  }
+  
+  .search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+  }
+  
+  .search-box input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: none;
+    border-radius: 25px;
+    background: rgba(255,255,255,0.9);
+    font-size: 14px;
+  }
+  
+  .search-box input:focus {
+    outline: none;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .header-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(0,0,0,0.1);
+    border: none;
+    border-radius: 20px;
+    color: var(--vakifbank-black);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .header-btn:hover {
+    background: rgba(0,0,0,0.2);
+  }
+  
+  .user-menu {
+    position: relative;
+  }
+  
+  .user-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    color: var(--vakifbank-black);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .user-btn:hover {
+    background: rgba(0,0,0,0.1);
+    border-radius: 20px;
+  }
+  
+  .user-btn i:first-child {
+    font-size: 24px;
+  }
+  
+  .user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 200px;
+    overflow: hidden;
+  }
+  
+  .user-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  
+  .user-dropdown a:hover {
+    background: var(--vakifbank-light-gray);
+  }
+  
+  .user-dropdown hr {
+    margin: 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+  }

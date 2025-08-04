@@ -1,0 +1,48 @@
+<header class="vakifbank-header">
+    <div class="header-container">
+      <div class="header-left">
+        <a routerLink="/dashboard" class="logo">
+          <i class="fas fa-university"></i>
+          VakıfBank
+        </a>
+      </div>
+      
+      <div class="header-center">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Ara...">
+        </div>
+      </div>
+      
+      <div class="header-right">
+        <button class="header-btn" routerLink="/exchange-rates">
+          <i class="fas fa-chart-line"></i>
+          <span>Döviz Kurları</span>
+        </button>
+        
+        <div class="user-menu">
+          <button class="user-btn" (click)="toggleUserMenu()">
+            <i class="fas fa-user-circle"></i>
+            <span>{{ currentUser?.name || 'Kullanıcı' }}</span>
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          
+          <div class="user-dropdown" *ngIf="showUserMenu">
+            <a routerLink="/profile">
+              <i class="fas fa-user"></i>
+              Profil
+            </a>
+            <a routerLink="/settings">
+              <i class="fas fa-cog"></i>
+              Ayarlar
+            </a>
+            <hr>
+            <a (click)="logout()">
+              <i class="fas fa-sign-out-alt"></i>
+              Çıkış Yap
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>

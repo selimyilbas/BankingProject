@@ -1,0 +1,77 @@
+<div class="register-container">
+    <div class="register-card">
+      <h2>Yeni Müşteri Kayıt</h2>
+      
+      <div class="vakifbank-alert vakifbank-alert-success" *ngIf="success">
+        <i class="fas fa-check-circle"></i>
+        <div>
+          <strong>Kayıt Başarılı!</strong><br>
+          Müşteri Numaranız: <strong>{{ customerNumber }}</strong><br>
+          <small>Yönlendiriliyorsunuz...</small>
+        </div>
+      </div>
+  
+      <div class="vakifbank-alert vakifbank-alert-error" *ngIf="error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{ error }}</span>
+      </div>
+  
+      <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+        <div class="form-row">
+          <div class="vakifbank-form-group">
+            <label class="vakifbank-form-label">Ad</label>
+            <input 
+              type="text" 
+              class="vakifbank-form-control" 
+              [(ngModel)]="customer.firstName" 
+              name="firstName"
+              required
+              placeholder="Adınız">
+          </div>
+  
+          <div class="vakifbank-form-group">
+            <label class="vakifbank-form-label">Soyad</label>
+            <input 
+              type="text" 
+              class="vakifbank-form-control" 
+              [(ngModel)]="customer.lastName" 
+              name="lastName"
+              required
+              placeholder="Soyadınız">
+          </div>
+        </div>
+  
+        <div class="vakifbank-form-group">
+          <label class="vakifbank-form-label">T.C. Kimlik Numarası</label>
+          <input 
+            type="text" 
+            class="vakifbank-form-control" 
+            [(ngModel)]="customer.tckn" 
+            name="tckn"
+            required
+            maxlength="11"
+            placeholder="11 haneli T.C. Kimlik Numaranız">
+        </div>
+  
+        <div class="vakifbank-form-group">
+          <label class="vakifbank-form-label">Doğum Tarihi</label>
+          <input 
+            type="date" 
+            class="vakifbank-form-control" 
+            [(ngModel)]="customer.dateOfBirth" 
+            name="dateOfBirth"
+            required>
+        </div>
+  
+        <button 
+          type="submit" 
+          class="btn-vakifbank" 
+          [disabled]="!registerForm.valid || loading">
+          <span *ngIf="!loading">Müşteri Oluştur</span>
+          <span *ngIf="loading">
+            <i class="fas fa-spinner fa-spin"></i> İşleminiz yapılıyor...
+          </span>
+        </button>
+      </form>
+    </div>
+  </div>

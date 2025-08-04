@@ -1,0 +1,306 @@
+/* src/styles.css */
+:root {
+    --vakifbank-yellow: #F5C842;
+    --vakifbank-dark-yellow: #E6B935;
+    --vakifbank-black: #1A1A1A;
+    --vakifbank-gray: #666666;
+    --vakifbank-light-gray: #F5F5F5;
+    --vakifbank-white: #FFFFFF;
+    --vakifbank-blue: #0066CC;
+    --vakifbank-green: #4CAF50;
+    --vakifbank-red: #DC3545;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--vakifbank-light-gray);
+    color: var(--vakifbank-black);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  /* VakıfBank Yellow Header */
+  .vakifbank-header {
+    background-color: var(--vakifbank-yellow);
+    color: var(--vakifbank-black);
+    padding: 10px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .vakifbank-logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--vakifbank-black);
+    text-decoration: none;
+  }
+  
+  /* Navigation */
+  .vakifbank-nav {
+    background-color: var(--vakifbank-white);
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0;
+  }
+  
+  .vakifbank-nav-item {
+    padding: 15px 20px;
+    color: var(--vakifbank-gray);
+    text-decoration: none;
+    display: inline-block;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .vakifbank-nav-item:hover {
+    color: var(--vakifbank-black);
+    background-color: var(--vakifbank-light-gray);
+  }
+  
+  .vakifbank-nav-item.active {
+    color: var(--vakifbank-black);
+    border-bottom-color: var(--vakifbank-yellow);
+  }
+  
+  /* Cards */
+  .vakifbank-card {
+    background-color: var(--vakifbank-white);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .vakifbank-card-header {
+    border-bottom: 2px solid var(--vakifbank-yellow);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Buttons */
+  .btn-vakifbank {
+    background-color: var(--vakifbank-black);
+    color: var(--vakifbank-white);
+    border: none;
+    padding: 12px 30px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 14px;
+  }
+  
+  .btn-vakifbank:hover {
+    background-color: #333;
+    transform: translateY(-1px);
+  }
+  
+  .btn-vakifbank-yellow {
+    background-color: var(--vakifbank-yellow);
+    color: var(--vakifbank-black);
+  }
+  
+  .btn-vakifbank-yellow:hover {
+    background-color: var(--vakifbank-dark-yellow);
+  }
+  
+  .btn-vakifbank-outline {
+    background-color: transparent;
+    color: var(--vakifbank-black);
+    border: 2px solid var(--vakifbank-black);
+  }
+  
+  .btn-vakifbank-outline:hover {
+    background-color: var(--vakifbank-black);
+    color: var(--vakifbank-white);
+  }
+  
+  /* Forms */
+  .vakifbank-form-group {
+    margin-bottom: 20px;
+  }
+  
+  .vakifbank-form-label {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--vakifbank-gray);
+    font-weight: 500;
+  }
+  
+  .vakifbank-form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  
+  .vakifbank-form-control:focus {
+    outline: none;
+    border-color: var(--vakifbank-yellow);
+    box-shadow: 0 0 0 2px rgba(245, 200, 66, 0.2);
+  }
+  
+  /* Tables */
+  .vakifbank-table {
+    width: 100%;
+    background-color: var(--vakifbank-white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .vakifbank-table thead {
+    background-color: var(--vakifbank-light-gray);
+  }
+  
+  .vakifbank-table th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--vakifbank-gray);
+    border-bottom: 2px solid #e0e0e0;
+  }
+  
+  .vakifbank-table td {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .vakifbank-table tr:hover {
+    background-color: #fafafa;
+  }
+  
+  /* Account Cards */
+  .account-card {
+    background: linear-gradient(135deg, var(--vakifbank-yellow) 0%, var(--vakifbank-dark-yellow) 100%);
+    color: var(--vakifbank-black);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .account-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  }
+  
+  .account-number {
+    font-size: 18px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  
+  .account-balance {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .account-currency {
+    font-size: 14px;
+    opacity: 0.8;
+  }
+  
+  /* Exchange Rate Display */
+  .exchange-rate-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: var(--vakifbank-white);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .currency-flag {
+    width: 30px;
+    height: 20px;
+    margin-right: 10px;
+    border-radius: 3px;
+  }
+  
+  .rate-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--vakifbank-black);
+  }
+  
+  /* Alerts */
+  .vakifbank-alert {
+    padding: 15px 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .vakifbank-alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-left: 4px solid var(--vakifbank-green);
+  }
+  
+  .vakifbank-alert-error {
+    background-color: #ffebee;
+    color: #c62828;
+    border-left: 4px solid var(--vakifbank-red);
+  }
+  
+  .vakifbank-alert-warning {
+    background-color: #fff8e1;
+    color: #f57c00;
+    border-left: 4px solid var(--vakifbank-yellow);
+  }
+  
+  /* Loading Spinner */
+  .vakifbank-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0,0,0,0.1);
+    border-left-color: var(--vakifbank-yellow);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .vakifbank-nav-item {
+      display: block;
+      width: 100%;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .account-card {
+      margin-bottom: 10px;
+    }
+    
+    .vakifbank-table {
+      font-size: 12px;
+    }
+    
+    .vakifbank-table th,
+    .vakifbank-table td {
+      padding: 10px;
+    }
+  }

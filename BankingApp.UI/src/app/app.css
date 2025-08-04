@@ -1,0 +1,15 @@
+.app-container {
+    min-height: 100vh;
+    background-color: var(--vakifbank-light-gray);
+  }
+  
+  .main-container {
+    display: flex;
+    min-height: calc(100vh - 60px);
+  }
+  
+  .content-area {
+    flex: 1;
+    padding: 20px;
+    background-color: var(--vakifbank-light-gray);
+  }

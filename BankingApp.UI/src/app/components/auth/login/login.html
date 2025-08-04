@@ -1,0 +1,59 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo">
+        <i class="fas fa-university"></i>
+        <span>VakıfBank</span>
+      </div>
+      <h2>Hoş Geldiniz</h2>
+    </div>
+    
+    <div class="login-tabs">
+      <button class="tab-button active">Bireysel</button>
+      <button class="tab-button">Ticari</button>
+    </div>
+    
+    <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+      <div class="form-group">
+        <label>Müşteri / T.C. Kimlik Numarası</label>
+        <input 
+          type="text" 
+          class="form-control" 
+          [(ngModel)]="credentials.tckn" 
+          name="tckn"
+          placeholder="Müşteri / T.C. Kimlik Numaranızı Giriniz"
+          required>
+      </div>
+      
+      <div class="form-group">
+        <label>Şifreniz</label>
+        <input 
+          type="password" 
+          class="form-control" 
+          [(ngModel)]="credentials.password" 
+          name="password"
+          placeholder="Şifrenizi Giriniz"
+          required>
+      </div>
+      
+      <button type="submit" class="btn-login" [disabled]="loading">
+        <span *ngIf="!loading">GİRİŞ YAP</span>
+        <span *ngIf="loading">
+          <i class="fas fa-spinner fa-spin"></i> Giriş yapılıyor...
+        </span>
+      </button>
+    </form>
+    
+    <div class="login-footer">
+      <a href="#" class="forgot-password">Dijital Şifrem Yok/Unuttum</a>
+    </div>
+    
+    <button type="button" class="btn btn-secondary mt-2" (click)="testLogin()">
+      Test Login (12345678901)
+    </button>
+    
+    <button type="button" class="btn btn-info mt-2" (click)="testApiConnection()">
+      Test API Connection
+    </button>
+  </div>
+</div>

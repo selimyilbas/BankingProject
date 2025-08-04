@@ -1,0 +1,17 @@
+# macOS system files
+.DS_Store
+**/.DS_Store
+._*
+
+# IDE files  
+.vscode/
+.idea/
+
+# Build outputs
+**/bin/
+**/obj/  
+**/node_modules/
+**/dist/
+
+# Logs
+*.log
