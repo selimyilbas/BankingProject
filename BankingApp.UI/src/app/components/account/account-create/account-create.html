@@ -1,1 +1,38 @@
-<p>account-create works!</p>
+<div class="account-create-container">
+  <h2>Yeni Hesap Aç</h2>
+
+  <form (ngSubmit)="createAccount()" #accountForm="ngForm">
+    <div class="form-group">
+      <label>Para Birimi</label>
+      <div class="currency-options">
+        <label *ngFor="let cur of currencies" class="currency-option">
+          <input
+            type="radio"
+            name="currency"
+            [value]="cur.code"
+            [(ngModel)]="selectedCurrency"
+            required
+          />
+          <span>{{ cur.name }} ({{ cur.code }})</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-vakifbank-yellow" [disabled]="loading || accountForm.invalid">
+        <i class="fas fa-spinner fa-spin" *ngIf="loading"></i>
+        Hesap Oluştur
+      </button>
+      <button type="button" class="btn-vakifbank-outline" (click)="router.navigate(['/dashboard'])" [disabled]="loading">
+        İptal
+      </button>
+    </div>
+
+    <div class="alert alert-success" *ngIf="success">
+      Hesap başarıyla oluşturuldu. Yönlendiriliyorsunuz...
+    </div>
+    <div class="alert alert-danger" *ngIf="error">
+      {{ error }}
+    </div>
+  </form>
+</div>

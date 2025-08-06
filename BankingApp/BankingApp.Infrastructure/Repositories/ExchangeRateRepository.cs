@@ -33,5 +33,13 @@ namespace BankingApp.Infrastructure.Repositories
                 .OrderByDescending(r => r.CaptureDate)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<ExchangeRateHistory?> GetCurrentRateAsync(string fromCurrency, string toCurrency)
+        {
+            return await _dbSet
+                .Where(r => r.FromCurrency == fromCurrency && r.ToCurrency == toCurrency)
+                .OrderByDescending(r => r.CaptureDate)
+                .FirstOrDefaultAsync();
+        }
     }
 }

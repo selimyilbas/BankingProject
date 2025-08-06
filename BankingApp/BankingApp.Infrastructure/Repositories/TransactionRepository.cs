@@ -36,7 +36,7 @@ namespace BankingApp.Infrastructure.Repositories
         public async Task<string> GenerateTransactionCodeAsync()
         {
             var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            var random = new Random().Next(1000, 9999);
+            var random = new Random().Next(10, 99); // keep code length <= 20
             return await Task.FromResult($"TRX{timestamp}{random}");
         }
     }

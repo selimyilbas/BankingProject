@@ -1,0 +1,290 @@
+# VakıfBank Banking Application - Cursor AI Rules
+
+While making changes, you should always follow the project file structure and rules. 
+Make sure to follow the rules and guidelines below.
+When you are making changes, you should make minimum changes to the code.
+You should not change the code that is not related to the feature you are working on.
+You should not change the code that is not related to the feature you are working on.
+
+## Project Overview
+
+
+You are working on a banking application internship project for VakıfBank. This is a full-stack application with specific architectural requirements and conventions that must be followed.
+
+## Tech Stack
+- **Backend**: C# .NET 8.0 with Clean Architecture
+- **Frontend**: Angular 17+ with standalone components (NO MODULES)
+- **Database**: SQL Server 2022 (running in Docker)
+- **Architecture**: Domain-Driven Design (DDD) with Repository Pattern
+- **Development OS**: macOS MacBook Air M2
+
+## Project File Structure
+```
+/Users/selimyilbas/Desktop/BankingProject/
+├── docker-compose.yml
+├── BankingApp/                      # Backend (.NET)
+│   ├── BankingApp.API/
+│   │   ├── Controllers/
+│   │   │   ├── CustomerController.cs
+│   │   │   ├── AccountController.cs
+│   │   │   ├── TransactionController.cs
+│   │   │   ├── TransferController.cs
+│   │   │   └── AuthController.cs
+│   │   ├── Program.cs
+│   │   └── appsettings.json
+│   ├── BankingApp.Application/
+│   │   ├── DTOs/
+│   │   │   ├── Customer/
+│   │   │   ├── Account/
+│   │   │   ├── Transaction/
+│   │   │   └── Transfer/
+│   │   ├── Services/
+│   │   │   ├── Interfaces/
+│   │   │   └── Implementations/
+│   │   └── Mappings/
+│   ├── BankingApp.Domain/
+│   │   ├── Entities/
+│   │   │   ├── Customer.cs         # Has 'Password' property (NOT PasswordHash)
+│   │   │   ├── Account.cs
+│   │   │   ├── Transaction.cs
+│   │   │   └── Transfer.cs
+│   │   └── Interfaces/
+│   ├── BankingApp.Infrastructure/
+│   │   ├── Data/
+│   │   │   ├── BankingDbContext.cs
+│   │   │   └── Configurations/
+│   │   └── Repositories/
+│   └── BankingApp.Common/
+└── BankingApp.UI/                   # Frontend (Angular)
+    ├── src/
+    │   ├── app/
+    │   │   ├── components/
+    │   │   │   ├── auth/
+    │   │   │   │   ├── login/
+    │   │   │   │   └── register/
+    │   │   │   ├── dashboard/
+    │   │   │   ├── customer/
+    │   │   │   ├── account/
+    │   │   │   ├── transaction/
+    │   │   │   ├── transfer/
+    │   │   │   └── layout/
+    │   │   ├── models/
+    │   │   │   ├── customer.model.ts
+    │   │   │   ├── account.model.ts
+    │   │   │   ├── transaction.model.ts
+    │   │   │   └── transfer.model.ts
+    │   │   ├── services/
+    │   │   │   ├── api.ts
+    │   │   │   ├── auth.ts
+    │   │   │   ├── customer.ts
+    │   │   │   ├── account.ts
+    │   │   │   └── transaction.ts
+    │   │   ├── app.ts
+    │   │   ├── app.routes.ts
+    │   │   └── app.config.ts
+    │   └── styles.css
+    └── angular.json
+```
+
+## Critical Rules - MUST FOLLOW
+
+### Backend Rules (.NET/C#)
+1. **NEVER use PasswordHash** - The Customer entity uses `Password` property (plain text for this test project)
+2. **API Response Format**: Always use ApiResponse<T> with lowercase properties:
+   ```csharp
+   public class ApiResponse<T>
+   {
+       public bool success { get; set; }  // lowercase!
+       public string message { get; set; }
+       public T? data { get; set; }
+       public List<string> errors { get; set; }
+   }
+   ```
+3. **Connection String**: Always use:
+   ```
+   Server=localhost,1433;Database=BankingDB;User Id=sa;Password=Selim@123456789;TrustServerCertificate=True
+   ```
+4. **Currency Rules**: Only TL, EUR, USD allowed
+5. **Account Number Format**: 
+   - TL accounts start with 1
+   - EUR accounts start with 2
+   - USD accounts start with 3
+
+### Frontend Rules (Angular)
+1. **NO MODULES** - Every component MUST be standalone
+2. **Component Creation**:
+   ```typescript
+   @Component({
+     selector: 'app-name',
+     standalone: true,  // REQUIRED
+     imports: [CommonModule, FormsModule], // Import what you need
+     templateUrl: './name.html',
+     styleUrl: './name.css'  // Note: styleUrl, not styleUrls
+   })
+   ```
+3. **File Naming**: Use `component-name.ts` NOT `component-name.component.ts`
+4. **API Base URL**: `http://localhost:5115/api`
+5. **No NgModules**: Don't create or use any .module.ts files
+
+### Database Rules
+1. **Tables**: Customers, Accounts, Transactions, Transfers, ExchangeRateHistory, CustomerNumberSequence, AccountNumberSequence
+2. **Test Users** (already in DB):
+   - TCKN: 12345678901, Password: 123456 (Ahmet Yılmaz)
+   - TCKN: 98765432109, Password: 123456 (Ayşe Kaya)
+   - TCKN: 11111111111, Password: 123456 (Test User)
+3. **Docker Container**: banking-sqlserver (port 1433)
+
+## Common Code Patterns
+
+### Creating a New Angular Component
+```typescript
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-example',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  templateUrl: './example.html',
+  styleUrl: './example.css'
+})
+export class ExampleComponent {
+  // Component logic
+}
+```
+
+### API Service Call Pattern
+```typescript
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiService } from './api';
+
+@Injectable({ providedIn: 'root' })
+export class ExampleService {
+  constructor(private api: ApiService) {}
+  
+  getData(): Observable<ApiResponse<any>> {
+    return this.api.get<ApiResponse<any>>('/endpoint');
+  }
+}
+```
+
+### Controller Pattern (.NET)
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+public class ExampleController : ControllerBase
+{
+    private readonly IUnitOfWork _unitOfWork;
+    
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateDto dto)
+    {
+        // Always return ApiResponse format
+        return Ok(new ApiResponse<object>
+        {
+            success = true,
+            message = "Success",
+            data = result
+        });
+    }
+}
+```
+
+## Development Commands
+
+### Start Backend API
+```bash
+cd /Users/selimyilbas/Desktop/BankingProject/BankingApp/BankingApp.API
+dotnet run
+```
+
+### Start Frontend
+```bash
+cd /Users/selimyilbas/Desktop/BankingProject/BankingApp.UI
+ng serve --open
+```
+
+### Docker Commands
+```bash
+# Start SQL Server
+cd /Users/selimyilbas/Desktop/BankingProject
+docker-compose up -d
+
+# Check if running
+docker ps
+
+# View logs
+docker logs banking-sqlserver
+```
+
+### Database Access
+- **Azure Data Studio Connection**:
+  - Server: localhost,1433
+  - Username: sa
+  - Password: Selim@123456789
+  - Database: BankingDB
+
+## Current Features Status
+✅ Customer Registration & Management
+✅ Multi-currency Account Creation (TL, EUR, USD)
+✅ Authentication (Login with TCKN & Password)
+✅ Deposit Transactions
+✅ Money Transfers (with currency exchange)
+✅ Transaction History
+✅ Exchange Rates (hardcoded)
+
+## Pending Features
+- Withdrawal functionality
+- Account statements (PDF)
+- Real-time exchange rates
+- MERNIS integration
+- Proper password hashing
+- Unit tests
+- Authorization (roles)
+
+## Common Issues & Solutions
+
+### Issue: Login not working
+- Check API response format (lowercase properties)
+- Ensure AuthController exists and has [HttpPost("login")]
+- Verify CORS is enabled for port 4200
+
+### Issue: Cannot create customer
+- Ensure CreateCustomerDto has Password property
+- Check TCKN is exactly 11 digits
+- Date format should be YYYY-MM-DD
+
+### Issue: Database connection failed
+- Ensure Docker is running: `docker ps`
+- Wait 30 seconds after starting Docker
+- Check connection string in appsettings.json
+
+## VakıfBank Branding
+- Primary Color: #F5C842 (Yellow)
+- Font: System default
+- Logo: Use <i class="fas fa-university"></i> with yellow color
+
+## Important Notes
+1. This is a TEST/LEARNING project - security is simplified
+2. Passwords are stored as plain text (NOT for production)
+3. Exchange rates are hardcoded
+4. No real MERNIS validation
+5. No actual banking compliance
+
+## When Creating New Features
+1. Always check if similar pattern exists in codebase
+2. Follow Clean Architecture principles
+3. Create DTOs for data transfer
+4. Use Repository pattern for data access
+5. Implement proper error handling with try-catch
+6. Return ApiResponse format from all endpoints
+7. Add logging for debugging
+
+## File Creation Guidelines
+- Place files in correct folders according to structure above
+- Follow existing naming conventions
+- Always include necessary imports
+- Add comments for complex logic
+- Use async/await for all database operations

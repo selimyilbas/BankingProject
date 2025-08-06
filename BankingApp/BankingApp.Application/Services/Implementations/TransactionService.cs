@@ -93,7 +93,7 @@ namespace BankingApp.Application.Services.Implementations
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing deposit");
-                return ApiResponse<TransactionDto>.ErrorResponse("An error occurred while processing deposit");
+                return ApiResponse<TransactionDto>.ErrorResponse($"Error processing deposit: {ex.Message}");
             }
         }
 

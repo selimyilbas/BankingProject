@@ -9,7 +9,8 @@ namespace BankingApp.Application.Services.Interfaces
     {
         Task<ApiResponse<TransferDto>> CreateTransferAsync(CreateTransferDto dto);
         Task<ApiResponse<TransferDto>> GetTransferByIdAsync(int transferId);
-        Task<ApiResponse<List<TransferDto>>> GetTransfersByAccountIdAsync(int accountId);
-        Task<ApiResponse<PagedResult<TransferDto>>> GetTransfersPagedAsync(int accountId, int pageNumber, int pageSize);
+        Task<ApiResponse<List<TransferDto>>> GetTransfersByAccountAsync(int accountId);
+        Task<ApiResponse<List<TransferDto>>> GetTransfersByCustomerAsync(int customerId);
+        Task<ApiResponse<object>> ValidateTransferAsync(CreateTransferDto dto);
     }
 }

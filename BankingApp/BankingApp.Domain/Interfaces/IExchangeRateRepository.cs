@@ -8,5 +8,6 @@ namespace BankingApp.Domain.Interfaces
     {
         Task<decimal?> GetLatestRateAsync(string fromCurrency, string toCurrency);
         Task<ExchangeRateHistory?> GetRateByDateAsync(string fromCurrency, string toCurrency, DateTime date);
+        Task<ExchangeRateHistory?> GetCurrentRateAsync(string fromCurrency, string toCurrency);
     }
 }

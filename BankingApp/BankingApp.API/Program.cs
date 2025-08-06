@@ -17,9 +17,12 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(BankingApp.Application.Mappings.MappingProfile).Assembly);
+
 // Add Infrastructure and Application services
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplication();
+builder.Services.AddApplicationServices();
 
 // Add CORS
 builder.Services.AddCors(options =>

@@ -37,6 +37,26 @@ namespace BankingApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Transfer>> GetByAccountAsync(int accountId)
+        {
+            return await _dbSet
+                .Where(t => t.FromAccountId == accountId || t.ToAccountId == accountId)
+                .Include(t => t.FromAccount)
+                .Include(t => t.ToAccount)
+                .OrderByDescending(t => t.TransferDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Transfer>> GetByCustomerAsync(int customerId)
+        {
+            return await _dbSet
+                .Include(t => t.FromAccount)
+                .Include(t => t.ToAccount)
+                .Where(t => t.FromAccount.CustomerId == customerId || t.ToAccount.CustomerId == customerId)
+                .OrderByDescending(t => t.TransferDate)
+                .ToListAsync();
+        }
+
         public async Task<string> GenerateTransferCodeAsync()
         {
             var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");

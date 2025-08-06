@@ -14,168 +14,93 @@ namespace BankingApp.Application.Services.Implementations
     public class TransferService : ITransferService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly ILogger<TransferService> _logger;
-        private readonly IExchangeRateService _exchangeRateService;
+        private readonly IMapper _mapper;
 
-        public TransferService(
-            IUnitOfWork unitOfWork, 
-            IMapper mapper, 
-            ILogger<TransferService> logger,
-            IExchangeRateService exchangeRateService)
+        public TransferService(IUnitOfWork unitOfWork, ILogger<TransferService> logger, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _logger = logger;
-            _exchangeRateService = exchangeRateService;
+            _mapper = mapper;
         }
 
         public async Task<ApiResponse<TransferDto>> CreateTransferAsync(CreateTransferDto dto)
         {
             try
             {
-                // Validate amount
-                if (dto.Amount <= 0)
+                _logger.LogInformation("Creating transfer from account {FromAccountId} to account {ToAccountId}", 
+                    dto.FromAccountId, dto.ToAccountId);
+
+                // Validate transfer
+                var validationResult = await ValidateTransferAsync(dto);
+                if (!validationResult.Success)
                 {
-                    return ApiResponse<TransferDto>.ErrorResponse("Amount must be greater than zero");
+                    return ApiResponse<TransferDto>.ErrorResponse(validationResult.Message);
                 }
 
                 // Get accounts
-                var fromAccount = await _unitOfWork.Accounts.GetByAccountNumberAsync(dto.FromAccountNumber);
-                var toAccount = await _unitOfWork.Accounts.GetByAccountNumberAsync(dto.ToAccountNumber);
+                var fromAccount = await _unitOfWork.Accounts.GetByIdAsync(dto.FromAccountId);
+                var toAccount = await _unitOfWork.Accounts.GetByIdAsync(dto.ToAccountId);
 
-                if (fromAccount == null)
+                if (fromAccount == null || toAccount == null)
                 {
-                    return ApiResponse<TransferDto>.ErrorResponse("Source account not found");
+                    return ApiResponse<TransferDto>.ErrorResponse("Hesap bulunamadı");
                 }
 
-                if (toAccount == null)
-                {
-                    return ApiResponse<TransferDto>.ErrorResponse("Destination account not found");
-                }
-
+                // Check if accounts are active
                 if (!fromAccount.IsActive || !toAccount.IsActive)
                 {
-                    return ApiResponse<TransferDto>.ErrorResponse("One or both accounts are inactive");
+                    return ApiResponse<TransferDto>.ErrorResponse("Hesap aktif değil");
                 }
 
-                // Check balance
+                // Check sufficient balance
                 if (fromAccount.Balance < dto.Amount)
                 {
-                    return ApiResponse<TransferDto>.ErrorResponse("Insufficient balance");
+                    return ApiResponse<TransferDto>.ErrorResponse("Yetersiz bakiye");
                 }
 
-                // Begin transaction
-                await _unitOfWork.BeginTransactionAsync();
-
-                try
+                // Get exchange rate
+                var exchangeRate = await _unitOfWork.ExchangeRates.GetCurrentRateAsync(fromAccount.Currency, toAccount.Currency);
+                if (exchangeRate == null)
                 {
-                    // Generate transfer code
-                    var transferCode = await _unitOfWork.Transfers.GenerateTransferCodeAsync();
-
-                    // Calculate exchange rate if different currencies
-                    decimal exchangeRate = 1.0m;
-                    decimal convertedAmount = dto.Amount;
-
-                    if (fromAccount.Currency != toAccount.Currency)
-                    {
-                        var rateResponse = await _exchangeRateService.GetExchangeRateAsync(
-                            fromAccount.Currency, 
-                            toAccount.Currency);
-                        
-                        if (!rateResponse.Success || rateResponse.Data == 0)
-                        {
-                            await _unitOfWork.RollbackTransactionAsync();
-                            return ApiResponse<TransferDto>.ErrorResponse("Failed to get exchange rate");
-                        }
-
-                        exchangeRate = rateResponse.Data;
-                        convertedAmount = dto.Amount * exchangeRate;
-                    }
-
-                    // Create transfer record
-                    var transfer = new Transfer
-                    {
-                        TransferCode = transferCode,
-                        FromAccountId = fromAccount.AccountId,
-                        ToAccountId = toAccount.AccountId,
-                        Amount = dto.Amount,
-                        FromCurrency = fromAccount.Currency,
-                        ToCurrency = toAccount.Currency,
-                        ExchangeRate = exchangeRate,
-                        ConvertedAmount = convertedAmount,
-                        Status = "PENDING",
-                        Description = dto.Description,
-                        TransferDate = DateTime.UtcNow
-                    };
-
-                    await _unitOfWork.Transfers.AddAsync(transfer);
-
-                    // Create debit transaction
-                    var debitTransactionCode = await _unitOfWork.Transactions.GenerateTransactionCodeAsync();
-                    var debitTransaction = new Transaction
-                    {
-                        TransactionCode = debitTransactionCode,
-                        AccountId = fromAccount.AccountId,
-                        TransactionType = "TRANSFER_OUT",
-                        Amount = dto.Amount,
-                        Currency = fromAccount.Currency,
-                        ExchangeRate = 1.0m,
-                        Description = $"Transfer to {toAccount.AccountNumber}: {dto.Description}",
-                        TransactionDate = DateTime.UtcNow,
-                        CreatedDate = DateTime.UtcNow
-                    };
-
-                    await _unitOfWork.Transactions.AddAsync(debitTransaction);
-
-                    // Create credit transaction
-                    var creditTransactionCode = await _unitOfWork.Transactions.GenerateTransactionCodeAsync();
-                    var creditTransaction = new Transaction
-                    {
-                        TransactionCode = creditTransactionCode,
-                        AccountId = toAccount.AccountId,
-                        TransactionType = "TRANSFER_IN",
-                        Amount = convertedAmount,
-                        Currency = toAccount.Currency,
-                        ExchangeRate = exchangeRate,
-                        Description = $"Transfer from {fromAccount.AccountNumber}: {dto.Description}",
-                        TransactionDate = DateTime.UtcNow,
-                        CreatedDate = DateTime.UtcNow
-                    };
-
-                    await _unitOfWork.Transactions.AddAsync(creditTransaction);
-
-                    // Update balances
-                    fromAccount.Balance -= dto.Amount;
-                    toAccount.Balance += convertedAmount;
-
-                    await _unitOfWork.Accounts.UpdateBalanceAsync(fromAccount.AccountId, fromAccount.Balance);
-                    await _unitOfWork.Accounts.UpdateBalanceAsync(toAccount.AccountId, toAccount.Balance);
-
-                    // Update transfer status
-                    transfer.Status = "COMPLETED";
-                    transfer.CompletedDate = DateTime.UtcNow;
-
-                    // Save changes
-                    await _unitOfWork.SaveChangesAsync();
-                    await _unitOfWork.CommitTransactionAsync();
-
-                    // Prepare response
-                    transfer.FromAccount = fromAccount;
-                    transfer.ToAccount = toAccount;
-                    var result = _mapper.Map<TransferDto>(transfer);
-                    return ApiResponse<TransferDto>.SuccessResponse(result, "Transfer completed successfully");
+                    return ApiResponse<TransferDto>.ErrorResponse("Döviz kuru bulunamadı");
                 }
-                catch (Exception)
+
+                // Calculate converted amount
+                var convertedAmount = dto.Amount * exchangeRate.Rate;
+
+                // Create transfer
+                var transfer = new BankingApp.Domain.Entities.Transfer
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    throw;
-                }
+                    TransferCode = await _unitOfWork.Transfers.GenerateTransferCodeAsync(),
+                    FromAccountId = dto.FromAccountId,
+                    ToAccountId = dto.ToAccountId,
+                    Amount = dto.Amount,
+                    FromCurrency = fromAccount.Currency,
+                    ToCurrency = toAccount.Currency,
+                    ExchangeRate = exchangeRate.Rate,
+                    ConvertedAmount = convertedAmount,
+                    Status = "COMPLETED",
+                    Description = dto.Description,
+                    TransferDate = DateTime.UtcNow,
+                    CompletedDate = DateTime.UtcNow
+                };
+
+                await _unitOfWork.Transfers.AddAsync(transfer);
+
+                // Update account balances
+                fromAccount.Balance -= dto.Amount;
+                toAccount.Balance += convertedAmount;
+
+                await _unitOfWork.SaveChangesAsync();
+
+                var transferDto = _mapper.Map<TransferDto>(transfer);
+                return ApiResponse<TransferDto>.SuccessResponse(transferDto, "Transfer başarıyla tamamlandı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing transfer");
-                return ApiResponse<TransferDto>.ErrorResponse("An error occurred while processing transfer");
+                _logger.LogError(ex, "Error creating transfer");
+                return ApiResponse<TransferDto>.ErrorResponse("Transfer oluşturulurken bir hata oluştu");
             }
         }
 
@@ -183,65 +108,102 @@ namespace BankingApp.Application.Services.Implementations
         {
             try
             {
-                var transfer = await _unitOfWork.Transfers.GetTransferWithDetailsAsync(transferId);
+                var transfer = await _unitOfWork.Transfers.GetByIdAsync(transferId);
                 if (transfer == null)
                 {
-                    return ApiResponse<TransferDto>.ErrorResponse("Transfer not found");
+                    return ApiResponse<TransferDto>.ErrorResponse("Transfer bulunamadı");
                 }
 
-                var result = _mapper.Map<TransferDto>(transfer);
-                return ApiResponse<TransferDto>.SuccessResponse(result);
+                var transferDto = _mapper.Map<TransferDto>(transfer);
+                return ApiResponse<TransferDto>.SuccessResponse(transferDto, "Transfer bilgisi başarıyla alındı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting transfer");
-                return ApiResponse<TransferDto>.ErrorResponse("An error occurred while retrieving transfer");
+                _logger.LogError(ex, "Error getting transfer {TransferId}", transferId);
+                return ApiResponse<TransferDto>.ErrorResponse("Transfer bilgisi alınırken bir hata oluştu");
             }
         }
 
-        public async Task<ApiResponse<List<TransferDto>>> GetTransfersByAccountIdAsync(int accountId)
+        public async Task<ApiResponse<List<TransferDto>>> GetTransfersByAccountAsync(int accountId)
         {
             try
             {
-                var transfers = await _unitOfWork.Transfers.GetTransfersByAccountIdAsync(accountId);
-                var result = _mapper.Map<List<TransferDto>>(transfers);
-                return ApiResponse<List<TransferDto>>.SuccessResponse(result);
+                var transfers = await _unitOfWork.Transfers.GetByAccountAsync(accountId);
+                var transferDtos = _mapper.Map<List<TransferDto>>(transfers);
+                return ApiResponse<List<TransferDto>>.SuccessResponse(transferDtos, "Transfer geçmişi başarıyla alındı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting transfers");
-                return ApiResponse<List<TransferDto>>.ErrorResponse("An error occurred while retrieving transfers");
+                _logger.LogError(ex, "Error getting transfers for account {AccountId}", accountId);
+                return ApiResponse<List<TransferDto>>.ErrorResponse("Transfer geçmişi alınırken bir hata oluştu");
             }
         }
 
-        public async Task<ApiResponse<PagedResult<TransferDto>>> GetTransfersPagedAsync(int accountId, int pageNumber, int pageSize)
+        public async Task<ApiResponse<List<TransferDto>>> GetTransfersByCustomerAsync(int customerId)
         {
             try
             {
-                var query = _unitOfWork.Transfers.Query()
-                    .Where(t => t.FromAccountId == accountId || t.ToAccountId == accountId)
-                    .OrderByDescending(t => t.TransferDate);
+                var transfers = await _unitOfWork.Transfers.GetByCustomerAsync(customerId);
+                var transferDtos = _mapper.Map<List<TransferDto>>(transfers);
+                return ApiResponse<List<TransferDto>>.SuccessResponse(transferDtos, "Müşteri transfer geçmişi başarıyla alındı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting transfers for customer {CustomerId}", customerId);
+                return ApiResponse<List<TransferDto>>.ErrorResponse("Müşteri transfer geçmişi alınırken bir hata oluştu");
+            }
+        }
 
-                var totalCount = query.Count();
-                var transfers = query
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
+        public async Task<ApiResponse<object>> ValidateTransferAsync(CreateTransferDto dto)
+        {
+            try
+            {
+                // Check if accounts exist
+                var fromAccount = await _unitOfWork.Accounts.GetByIdAsync(dto.FromAccountId);
+                var toAccount = await _unitOfWork.Accounts.GetByIdAsync(dto.ToAccountId);
 
-                var result = new PagedResult<TransferDto>
+                if (fromAccount == null || toAccount == null)
                 {
-                    Items = _mapper.Map<List<TransferDto>>(transfers),
-                    TotalCount = totalCount,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize
-                };
+                    return ApiResponse<object>.ErrorResponse("Hesap bulunamadı");
+                }
 
-                return ApiResponse<PagedResult<TransferDto>>.SuccessResponse(result);
+                // Check if accounts are active
+                if (!fromAccount.IsActive || !toAccount.IsActive)
+                {
+                    return ApiResponse<object>.ErrorResponse("Hesap aktif değil");
+                }
+
+                // Check if same account
+                if (dto.FromAccountId == dto.ToAccountId)
+                {
+                    return ApiResponse<object>.ErrorResponse("Aynı hesaba transfer yapılamaz");
+                }
+
+                // Check sufficient balance
+                if (fromAccount.Balance < dto.Amount)
+                {
+                    return ApiResponse<object>.ErrorResponse("Yetersiz bakiye");
+                }
+
+                // Check amount is positive
+                if (dto.Amount <= 0)
+                {
+                    return ApiResponse<object>.ErrorResponse("Transfer tutarı pozitif olmalıdır");
+                }
+
+                // Check exchange rate availability
+                var exchangeRate = await _unitOfWork.ExchangeRates.GetCurrentRateAsync(fromAccount.Currency, toAccount.Currency);
+                if (exchangeRate == null)
+                {
+                    return ApiResponse<object>.ErrorResponse("Döviz kuru bulunamadı");
+                }
+
+                return ApiResponse<object>.SuccessResponse(new { IsValid = true }, "Transfer doğrulaması başarılı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting paged transfers");
-                return ApiResponse<PagedResult<TransferDto>>.ErrorResponse("An error occurred while retrieving transfers");
+                _logger.LogError(ex, "Error validating transfer");
+                return ApiResponse<object>.ErrorResponse("Transfer doğrulaması sırasında bir hata oluştu");
             }
         }
     }

@@ -8,6 +8,8 @@ namespace BankingApp.Domain.Interfaces
     {
         Task<Transfer?> GetTransferWithDetailsAsync(int transferId);
         Task<IEnumerable<Transfer>> GetTransfersByAccountIdAsync(int accountId);
+        Task<IEnumerable<Transfer>> GetByAccountAsync(int accountId);
+        Task<IEnumerable<Transfer>> GetByCustomerAsync(int customerId);
         Task<string> GenerateTransferCodeAsync();
     }
 }

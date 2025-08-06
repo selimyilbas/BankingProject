@@ -6,6 +6,9 @@ using BankingApp.Application.DTOs.Common;
 namespace BankingApp.API.Controllers
 {
     [ApiController]
+
+
+    // http://localhost:5115/swagger(api)/customer 
     [Route("api/[controller]")]
     public class CustomerController : ControllerBase
     {
