@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CustomerService } from '../../../services/customer';
+import { AuthService } from '../../../services/auth';
 
 @Component({
   selector: 'app-register',
@@ -16,7 +16,8 @@ export class RegisterComponent {
     firstName: '',
     lastName: '',
     tckn: '',
-    dateOfBirth: ''
+    dateOfBirth: '',
+    password: ''
   };
   
   loading = false;
@@ -25,7 +26,7 @@ export class RegisterComponent {
   customerNumber = '';
 
   constructor(
-    private customerService: CustomerService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
@@ -34,13 +35,15 @@ export class RegisterComponent {
     this.error = '';
     this.success = false;
 
-    // Convert date string to Date object
-    const customerData = {
-      ...this.customer,
-      dateOfBirth: new Date(this.customer.dateOfBirth)
+        const request = {
+      firstName: this.customer.firstName,
+      lastName: this.customer.lastName,
+      tckn: this.customer.tckn,
+      password: this.customer.password,
+      dateOfBirth: this.customer.dateOfBirth
     };
 
-    this.customerService.createCustomer(customerData).subscribe({
+    this.authService.register(request).subscribe({
       next: (response) => {
         if (response.success) {
           this.success = true;
@@ -51,12 +54,13 @@ export class RegisterComponent {
             firstName: '',
             lastName: '',
             tckn: '',
-            dateOfBirth: ''
+            dateOfBirth: '',
+            password: ''
           };
           
           // Redirect after 3 seconds
           setTimeout(() => {
-            this.router.navigate(['/customers']);
+            this.router.navigate(['/login']);
           }, 3000);
         } else {
           this.error = response.message;
