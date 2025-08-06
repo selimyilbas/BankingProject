@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AccountService } from '../../services/account';
 import { AuthService } from '../../services/auth';
+import { ExchangeRateService, ExchangeRateDisplay } from '../../services/exchange-rate.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,22 +21,23 @@ export class DashboardComponent implements OnInit {
     USD: 0
   };
   loading = true;
+  exchangeRatesLoading = true;
   today = new Date();
 
-  exchangeRates = {
-    USD: { buy: 32.45, sell: 32.55 },
-    EUR: { buy: 35.15, sell: 35.25 }
-  };
+  exchangeRates: ExchangeRateDisplay[] = [];
+  exchangeRatesLastUpdated: Date = new Date();
 
   constructor(
     private authService: AuthService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private exchangeRateService: ExchangeRateService
   ) {
     this.currentUser = this.authService.getCurrentUser();
   }
 
   ngOnInit() {
     this.loadAccounts();
+    this.loadExchangeRates();
   }
 
   loadAccounts() {
@@ -62,6 +64,40 @@ export class DashboardComponent implements OnInit {
     this.accounts.forEach(account => {
       this.totalBalance[account.currency as keyof typeof this.totalBalance] += account.balance;
     });
+  }
+
+  loadExchangeRates() {
+    this.exchangeRatesLoading = true;
+    this.exchangeRateService.getCurrentExchangeRates()
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.exchangeRates = response.data.rates;
+            this.exchangeRatesLastUpdated = new Date(response.data.lastUpdated);
+          } else {
+            console.error('Failed to load exchange rates:', response.message);
+            // Fallback to hardcoded rates
+            this.exchangeRates = [
+              { currency: 'USD', currencyName: 'Amerikan Doları', buyRate: 32.45, sellRate: 32.55 },
+              { currency: 'EUR', currencyName: 'Euro', buyRate: 35.15, sellRate: 35.25 }
+            ];
+          }
+          this.exchangeRatesLoading = false;
+        },
+        error: (error) => {
+          console.error('Error loading exchange rates:', error);
+          // Fallback to hardcoded rates
+          this.exchangeRates = [
+            { currency: 'USD', currencyName: 'Amerikan Doları', buyRate: 32.45, sellRate: 32.55 },
+            { currency: 'EUR', currencyName: 'Euro', buyRate: 35.15, sellRate: 35.25 }
+          ];
+          this.exchangeRatesLoading = false;
+        }
+      });
+  }
+
+  refreshExchangeRates() {
+    this.loadExchangeRates();
   }
 
   getCurrencyIcon(currency: string): string {

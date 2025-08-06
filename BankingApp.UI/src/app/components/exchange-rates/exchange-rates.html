@@ -1,1 +1,69 @@
-<p>exchange-rates works!</p>
+<div class="exchange-rates-container">
+  <div class="page-header">
+    <h1>Döviz Kurları</h1>
+    <button (click)="refreshRates()" class="refresh-btn" [disabled]="loading">
+      <i class="fas fa-sync-alt" [class.spinning]="loading"></i>
+      Yenile
+    </button>
+  </div>
+
+  <div class="rates-info">
+    <p>Güncel döviz kurları ve çapraz kurlar.</p>
+    <div class="last-updated" *ngIf="lastUpdated && !loading">
+      <i class="fas fa-clock"></i>
+      Son güncelleme: {{ lastUpdated | date:'dd.MM.yyyy HH:mm:ss' }}
+    </div>
+  </div>
+
+  <div class="loading-container" *ngIf="loading">
+    <div class="vakifbank-spinner"></div>
+    <p>Döviz kurları yükleniyor...</p>
+  </div>
+
+  <div class="rates-grid" *ngIf="!loading">
+    <div class="rate-card" *ngFor="let rate of exchangeRates">
+      <div class="rate-header">
+        <div class="currency-info">
+          <span class="currency-code">{{ rate.currency }}</span>
+          <span class="currency-name">{{ rate.currencyName }}</span>
+        </div>
+        <div class="currency-flag">
+          <i class="fas fa-coins"></i>
+        </div>
+      </div>
+      
+      <div class="rate-details">
+        <div class="rate-row">
+          <div class="rate-type">
+            <span class="label">Alış Kuru</span>
+            <span class="sublabel">Banka Alış</span>
+          </div>
+          <div class="rate-value buy">
+            <span class="value">{{ rate.buyRate | number:'1.4-4' }}</span>
+            <span class="currency">₺</span>
+          </div>
+        </div>
+
+        <div class="rate-row">
+          <div class="rate-type">
+            <span class="label">Satış Kuru</span>
+            <span class="sublabel">Banka Satış</span>
+          </div>
+          <div class="rate-value sell">
+            <span class="value">{{ rate.sellRate | number:'1.4-4' }}</span>
+            <span class="currency">₺</span>
+          </div>
+        </div>
+
+        <div class="rate-spread">
+          <span class="spread-label">Spread:</span>
+          <span class="spread-value">{{ (rate.sellRate - rate.buyRate) | number:'1.4-4' }} ₺</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer" *ngIf="!loading">
+    <p><i class="fas fa-info-circle"></i> Kurlar anlık olarak güncellenmektedir. İşlem yapmadan önce güncel kurları kontrol ediniz.</p>
+  </div>
+</div>

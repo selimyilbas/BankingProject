@@ -59,44 +59,43 @@
       <div class="exchange-rates-section">
         <div class="section-header">
           <h2>Döviz Kurları</h2>
-          <a routerLink="/exchange-rates" class="view-all">Detaylı Görünüm</a>
+          <div class="header-actions">
+            <button (click)="refreshExchangeRates()" class="refresh-btn" [disabled]="exchangeRatesLoading">
+              <i class="fas fa-sync-alt" [class.spinning]="exchangeRatesLoading"></i>
+            </button>
+            <a routerLink="/exchange-rates" class="view-all">Detaylı Görünüm</a>
+          </div>
         </div>
-  
-        <div class="exchange-rates">
-          <div class="rate-card">
+
+        <div class="exchange-rates" *ngIf="!exchangeRatesLoading; else exchangeRatesLoadingTemplate">
+          <div class="rate-card" *ngFor="let rate of exchangeRates">
             <div class="currency-info">
-              <span class="currency-code">USD</span>
-              <span class="currency-name">Amerikan Doları</span>
+              <span class="currency-code">{{ rate.currency }}</span>
+              <span class="currency-name">{{ rate.currencyName }}</span>
             </div>
             <div class="rate-values">
               <div class="rate">
                 <span class="label">Alış</span>
-                <span class="value">{{ exchangeRates.USD.buy }}</span>
+                <span class="value">{{ rate.buyRate | number:'1.4-4' }}</span>
               </div>
               <div class="rate">
                 <span class="label">Satış</span>
-                <span class="value">{{ exchangeRates.USD.sell }}</span>
+                <span class="value">{{ rate.sellRate | number:'1.4-4' }}</span>
               </div>
             </div>
           </div>
-  
-          <div class="rate-card">
-            <div class="currency-info">
-              <span class="currency-code">EUR</span>
-              <span class="currency-name">Euro</span>
-            </div>
-            <div class="rate-values">
-              <div class="rate">
-                <span class="label">Alış</span>
-                <span class="value">{{ exchangeRates.EUR.buy }}</span>
-              </div>
-              <div class="rate">
-                <span class="label">Satış</span>
-                <span class="value">{{ exchangeRates.EUR.sell }}</span>
-              </div>
-            </div>
+          
+          <div class="last-updated" *ngIf="exchangeRatesLastUpdated">
+            <small>Son güncelleme: {{ exchangeRatesLastUpdated | date:'dd.MM.yyyy HH:mm' }}</small>
           </div>
         </div>
+
+        <ng-template #exchangeRatesLoadingTemplate>
+          <div class="exchange-rates-loading">
+            <div class="vakifbank-spinner"></div>
+            <p>Döviz kurları yükleniyor...</p>
+          </div>
+        </ng-template>
       </div>
     </div>
   

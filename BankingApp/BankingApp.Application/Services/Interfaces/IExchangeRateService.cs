@@ -8,5 +8,6 @@ namespace BankingApp.Application.Services.Interfaces
         Task<ApiResponse<decimal>> GetExchangeRateAsync(string fromCurrency, string toCurrency);
         Task<ApiResponse<decimal>> ConvertAmountAsync(decimal amount, string fromCurrency, string toCurrency);
         Task UpdateExchangeRatesAsync();
+        Task<ApiResponse<ExchangeRatesResponseDto>> GetCurrentExchangeRatesAsync();
     }
 }

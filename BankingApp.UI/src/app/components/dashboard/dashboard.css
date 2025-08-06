@@ -73,6 +73,41 @@
   .section-header h2 {
     font-size: 20px;
     color: var(--vakifbank-black);
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .refresh-btn {
+    background: none;
+    border: none;
+    color: var(--vakifbank-yellow);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+  }
+
+  .refresh-btn:hover:not(:disabled) {
+    background-color: rgba(245, 200, 66, 0.1);
+  }
+
+  .refresh-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .refresh-btn i.spinning {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
   }
   
   .view-all {
@@ -227,6 +262,28 @@
     align-items: center;
     padding: 40px;
   }
+
+  .exchange-rates-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--vakifbank-gray);
+  }
+
+  .exchange-rates-loading .vakifbank-spinner {
+    margin: 0 auto 15px;
+  }
+
+  .last-updated {
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .last-updated small {
+    color: var(--vakifbank-gray);
+    font-size: 12px;
+  }
   
   @media (max-width: 768px) {
     .dashboard-grid {
@@ -235,5 +292,10 @@
     
     .quick-actions {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    .header-actions {
+      flex-direction: column;
+      gap: 5px;
     }
   }
