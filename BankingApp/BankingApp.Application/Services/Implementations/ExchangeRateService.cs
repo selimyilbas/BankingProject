@@ -259,7 +259,8 @@ namespace BankingApp.Application.Services.Implementations
         {
             try
             {
-                var url = $"{EXCHANGE_API_BASE_URL}/{fromCurrency}";
+                // Simplified: always fetch USD base for reliable free-tier support
+                var url = $"{EXCHANGE_API_BASE_URL}/USD";
                 _logger.LogInformation("Fetching exchange rate from: {Url}", url);
 
                 var response = await _httpClient.GetAsync(url);
@@ -278,12 +279,27 @@ namespace BankingApp.Application.Services.Implementations
                 
                 if (root.TryGetProperty("rates", out var ratesElement))
                 {
-                    if (ratesElement.TryGetProperty(toCurrency, out var rateElement))
+                    decimal? crossRate = null;
+                    if (ratesElement.TryGetProperty(toCurrency, out var toRateElem))
                     {
-                        var rate = rateElement.GetDecimal();
-                        _logger.LogInformation("Successfully fetched rate {FromCurrency}-{ToCurrency}: {Rate}", 
-                            fromCurrency, toCurrency, rate);
-                        return rate;
+                        var toRate = toRateElem.GetDecimal();
+                        if (fromCurrency == "USD")
+                        {
+                            crossRate = toRate; // USD → X
+                        }
+                        else if (ratesElement.TryGetProperty(fromCurrency, out var fromRateElem))
+                        {
+                            var fromRate = fromRateElem.GetDecimal();
+                            if (fromRate > 0)
+                            {
+                                crossRate = toRate / fromRate; // cross via USD
+                            }
+                        }
+                    }
+                    if (crossRate.HasValue)
+                    {
+                        _logger.LogInformation("Cross rate {FromCurrency}-{ToCurrency}: {Rate}", fromCurrency, toCurrency, crossRate);
+                        return crossRate;
                     }
                     else
                     {

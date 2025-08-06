@@ -16,12 +16,14 @@ namespace BankingApp.Application.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<TransferService> _logger;
         private readonly IMapper _mapper;
+        private readonly IExchangeRateService _exchangeRateService;
 
-        public TransferService(IUnitOfWork unitOfWork, ILogger<TransferService> logger, IMapper mapper)
+        public TransferService(IUnitOfWork unitOfWork, ILogger<TransferService> logger, IMapper mapper, IExchangeRateService exchangeRateService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
+            _exchangeRateService = exchangeRateService;
         }
 
         public async Task<ApiResponse<TransferDto>> CreateTransferAsync(CreateTransferDto dto)
@@ -59,15 +61,28 @@ namespace BankingApp.Application.Services.Implementations
                     return ApiResponse<TransferDto>.ErrorResponse("Yetersiz bakiye");
                 }
 
-                // Get exchange rate
-                var exchangeRate = await _unitOfWork.ExchangeRates.GetCurrentRateAsync(fromAccount.Currency, toAccount.Currency);
-                if (exchangeRate == null)
+                // Get exchange rate (map TL→TRY)
+                var fromCurrencyMapped = fromAccount.Currency == "TL" ? "TRY" : fromAccount.Currency;
+                var toCurrencyMapped = toAccount.Currency == "TL" ? "TRY" : toAccount.Currency;
+                var exchangeRateEntity = await _unitOfWork.ExchangeRates.GetCurrentRateAsync(fromCurrencyMapped, toCurrencyMapped);
+                decimal rate;
+                if (exchangeRateEntity == null)
                 {
-                    return ApiResponse<TransferDto>.ErrorResponse("Döviz kuru bulunamadı");
+                    // Fallback to live API
+                    var rateResponse = await _exchangeRateService.GetExchangeRateAsync(fromCurrencyMapped, toCurrencyMapped);
+                    if (!rateResponse.Success || rateResponse.Data == 0)
+                    {
+                        return ApiResponse<TransferDto>.ErrorResponse("Döviz kuru bulunamadı");
+                    }
+                    rate = rateResponse.Data;
+                }
+                else
+                {
+                    rate = exchangeRateEntity.Rate;
                 }
 
                 // Calculate converted amount
-                var convertedAmount = dto.Amount * exchangeRate.Rate;
+                var convertedAmount = dto.Amount * rate;
 
                 // Create transfer
                 var transfer = new BankingApp.Domain.Entities.Transfer
@@ -78,7 +93,7 @@ namespace BankingApp.Application.Services.Implementations
                     Amount = dto.Amount,
                     FromCurrency = fromAccount.Currency,
                     ToCurrency = toAccount.Currency,
-                    ExchangeRate = exchangeRate.Rate,
+                    ExchangeRate = rate,
                     ConvertedAmount = convertedAmount,
                     Status = "COMPLETED",
                     Description = dto.Description,
@@ -192,10 +207,16 @@ namespace BankingApp.Application.Services.Implementations
                 }
 
                 // Check exchange rate availability
-                var exchangeRate = await _unitOfWork.ExchangeRates.GetCurrentRateAsync(fromAccount.Currency, toAccount.Currency);
-                if (exchangeRate == null)
+                var fromCurrencyMapped = fromAccount.Currency == "TL" ? "TRY" : fromAccount.Currency;
+                var toCurrencyMapped = toAccount.Currency == "TL" ? "TRY" : toAccount.Currency;
+                var exchangeRateEntity = await _unitOfWork.ExchangeRates.GetCurrentRateAsync(fromCurrencyMapped, toCurrencyMapped);
+                if (exchangeRateEntity == null)
                 {
-                    return ApiResponse<object>.ErrorResponse("Döviz kuru bulunamadı");
+                    var rateResponse = await _exchangeRateService.GetExchangeRateAsync(fromCurrencyMapped, toCurrencyMapped);
+                    if (!rateResponse.Success || rateResponse.Data == 0)
+                    {
+                        return ApiResponse<object>.ErrorResponse("Döviz kuru bulunamadı");
+                    }
                 }
 
                 return ApiResponse<object>.SuccessResponse(new { IsValid = true }, "Transfer doğrulaması başarılı");

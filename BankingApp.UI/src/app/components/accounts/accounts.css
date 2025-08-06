@@ -1,0 +1,394 @@
+.accounts-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.page-header h1 {
+  color: #333;
+  font-size: 28px;
+  margin: 0;
+}
+
+.refresh-btn {
+  background: #F5C842;
+  color: #333;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background: #e6b93d;
+  transform: translateY(-1px);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-btn i.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-container {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-container .vakifbank-spinner {
+  margin: 0 auto 20px;
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
+}
+
+.alert {
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.alert-danger {
+  background: #fee;
+  color: #c33;
+  border: 1px solid #fcc;
+}
+
+.total-balances {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.total-balances h2 {
+  font-size: 20px;
+  color: #333;
+  margin: 0 0 20px 0;
+}
+
+.balance-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.balance-card {
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.balance-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.balance-card.total-tl {
+  border-left: 4px solid #F5C842;
+}
+
+.balance-card.total-usd {
+  border-left: 4px solid #4CAF50;
+}
+
+.balance-card.total-eur {
+  border-left: 4px solid #2196F3;
+}
+
+.currency-icon {
+  font-size: 36px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #f5f5f5;
+}
+
+.total-tl .currency-icon {
+  color: #F5C842;
+  background: #fef9e7;
+}
+
+.total-usd .currency-icon {
+  color: #4CAF50;
+  background: #e8f5e9;
+}
+
+.total-eur .currency-icon {
+  color: #2196F3;
+  background: #e3f2fd;
+}
+
+.balance-info {
+  flex: 1;
+}
+
+.currency-name {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.balance-amount {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.accounts-list {
+  margin-top: 30px;
+}
+
+.no-accounts {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.no-accounts i {
+  font-size: 64px;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.no-accounts p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #F5C842;
+  color: #333;
+}
+
+.btn-primary:hover {
+  background: #e6b93d;
+  transform: translateY(-1px);
+}
+
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+.account-card {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-top: 4px solid #ddd;
+}
+
+.account-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.account-card.currency-tl {
+  border-top-color: #F5C842;
+}
+
+.account-card.currency-usd {
+  border-top-color: #4CAF50;
+}
+
+.account-card.currency-eur {
+  border-top-color: #2196F3;
+}
+
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.account-type {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.account-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  color: #666;
+}
+
+.account-status.active {
+  color: #4CAF50;
+}
+
+.account-status i {
+  font-size: 16px;
+}
+
+.account-number {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 25px;
+  font-family: 'Courier New', monospace;
+}
+
+.account-number i {
+  color: #999;
+}
+
+.account-balance {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 25px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.currency-symbol {
+  font-size: 24px;
+  color: #666;
+}
+
+.amount {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+}
+
+.currency-code {
+  font-size: 18px;
+  color: #666;
+  margin-left: 5px;
+}
+
+.account-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background: #F5C842;
+  border-color: #F5C842;
+  color: #333;
+  transform: translateY(-1px);
+}
+
+.action-btn i {
+  font-size: 20px;
+}
+
+.account-footer {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .accounts-container {
+    padding: 15px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .page-header h1 {
+    font-size: 24px;
+  }
+
+  .balance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .accounts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .account-actions {
+    flex-wrap: wrap;
+  }
+
+  .amount {
+    font-size: 24px;
+  }
+}

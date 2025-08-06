@@ -64,6 +64,10 @@ namespace BankingApp.Infrastructure.Data.Configurations
             builder.HasIndex(t => t.TransferDate);
             builder.HasIndex(t => new { t.FromAccountId, t.TransferDate });
             builder.HasIndex(t => new { t.ToAccountId, t.TransferDate });
+
+            // Ignore navigation-only properties to avoid shadow fk columns
+            builder.Ignore(t => t.FromTransaction);
+            builder.Ignore(t => t.ToTransaction);
         }
     }
 }

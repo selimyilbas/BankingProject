@@ -136,9 +136,12 @@ namespace BankingApp.API.Controllers
                 // Use plain password for testing
                 var password = registerDto.Password;
 
-                // Create new customer
+                // Generate unique customer number
+                var customerNumber = await _unitOfWork.Customers.GenerateCustomerNumberAsync();
+
                 var customer = new BankingApp.Domain.Entities.Customer
                 {
+                    CustomerNumber = customerNumber,
                     FirstName = registerDto.FirstName,
                     LastName = registerDto.LastName,
                     TCKN = registerDto.TCKN,
@@ -150,7 +153,6 @@ namespace BankingApp.API.Controllers
                     CreatedDate = DateTime.UtcNow
                 };
 
-                // Add customer to database
                 await _unitOfWork.Customers.AddAsync(customer);
                 await _unitOfWork.SaveChangesAsync();
 

@@ -6,14 +6,18 @@ import { DashboardComponent } from './components/dashboard/dashboard';
 import { TransferComponent } from './components/transfer/transfer.component';
 import { AccountCreateComponent } from './components/account/account-create/account-create';
 import { DepositComponent } from './components/transaction/deposit/deposit';
+import { AccountsComponent } from './components/accounts/accounts';
+import { ExchangeRatesComponent } from './components/exchange-rates/exchange-rates';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'accounts', component: AccountsComponent },
   { path: 'account/create', component: AccountCreateComponent },
   { path: 'deposit', component: DepositComponent },
   { path: 'transfer', component: TransferComponent },
+  { path: 'exchange-rates', component: ExchangeRatesComponent },
   { path: '**', redirectTo: '/login' }
 ];

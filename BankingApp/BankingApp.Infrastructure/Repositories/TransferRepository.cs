@@ -60,7 +60,7 @@ namespace BankingApp.Infrastructure.Repositories
         public async Task<string> GenerateTransferCodeAsync()
         {
             var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
-            var random = new Random().Next(1000, 9999);
+            var random = new Random().Next(10, 99); // 2 haneli
             return await Task.FromResult($"TRF{timestamp}{random}");
         }
     }

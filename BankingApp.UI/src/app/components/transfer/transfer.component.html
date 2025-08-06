@@ -9,7 +9,7 @@
       <label for="fromAccount">Kaynak Hesap</label>
       <select 
         id="fromAccount" 
-        [(ngModel)]="transferRequest.fromAccountId"
+        [(ngModel)]="transferRequest.fromAccountId" (ngModelChange)="updatePreview()"
         class="form-control"
         [disabled]="loading">
         <option value="0">Hesap seçin</option>
@@ -25,7 +25,7 @@
       <label for="toAccount">Hedef Hesap</label>
       <select 
         id="toAccount" 
-        [(ngModel)]="transferRequest.toAccountId"
+        [(ngModel)]="transferRequest.toAccountId" (ngModelChange)="updatePreview()"
         class="form-control"
         [disabled]="loading">
         <option value="0">Hesap seçin</option>
@@ -43,7 +43,7 @@
       <input 
         type="number" 
         id="amount"
-        [(ngModel)]="transferRequest.amount"
+        [(ngModel)]="transferRequest.amount" (ngModelChange)="updatePreview()"
         class="form-control"
         placeholder="0.00"
         min="0.01"
@@ -78,9 +78,13 @@
         <span>{{ transferRequest.amount | number:'1.2-2' }} {{ getFromAccount()?.currency }}</span>
       </div>
       <div class="preview-item" *ngIf="getFromAccount()?.currency !== getToAccount()?.currency">
-        <span>Dönüşüm:</span>
-        <span>{{ transferRequest.amount | number:'1.2-2' }} {{ getFromAccount()?.currency }} → {{ getToAccount()?.currency }}</span>
-      </div>
+    <span>Dönüşüm:</span>
+    <span *ngIf="!conversionLoading && !conversionError">
+      {{ transferRequest.amount | number:'1.2-2' }} {{ getFromAccount()?.currency }} ≈ {{ convertedAmount | number:'1.2-2' }} {{ getToAccount()?.currency }}
+    </span>
+    <span *ngIf="conversionLoading"><i class="fas fa-spinner fa-spin"></i> hesaplanıyor...</span>
+    <span *ngIf="conversionError" class="text-danger">{{ conversionError }}</span>
+  </div>
     </div>
 
     <!-- Messages -->
@@ -91,12 +95,25 @@
       {{ errorMessage }}
     </div>
 
+    <!-- Confirm Box -->
+    <div *ngIf="showConfirm" class="confirm-box vakifbank-alert vakifbank-alert-warning">
+      <p>
+        {{ transferRequest.amount | number:'1.2-2' }} {{ getFromAccount()?.currency }}
+        <span *ngIf="getFromAccount()?.currency !== getToAccount()?.currency">
+          ≈ {{ convertedAmount | number:'1.2-2' }} {{ getToAccount()?.currency }}
+        </span>
+        tutarındaki transferi onaylıyor musunuz?
+      </p>
+      <button type="button" class="btn btn-primary" (click)="confirmTransfer()" [disabled]="loading">Onayla</button>
+      <button type="button" class="btn btn-secondary" (click)="cancelConfirm()" [disabled]="loading">İptal</button>
+    </div>
+
     <!-- Action Buttons -->
-    <div class="form-actions">
+    <div class="form-actions" *ngIf="!showConfirm">
       <button 
         type="button" 
         class="btn btn-primary"
-        (click)="createTransfer()"
+        (click)="requestTransfer()"
         [disabled]="loading || !transferRequest.fromAccountId || !transferRequest.toAccountId || !transferRequest.amount">
         <span *ngIf="!loading">Transfer Yap</span>
         <span *ngIf="loading">

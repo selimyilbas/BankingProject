@@ -1,4 +1,5 @@
 <div class="app-container">
+  <!-- Authenticated layout -->
   <app-header *ngIf="authService.isLoggedIn()"></app-header>
   <div class="main-container" *ngIf="authService.isLoggedIn()">
     <app-sidebar></app-sidebar>
@@ -6,5 +7,7 @@
       <router-outlet></router-outlet>
     </div>
   </div>
-  <app-login *ngIf="!authService.isLoggedIn()"></app-login>
+
+  <!-- Public (unauthenticated) pages such as /login or /register -->
+  <router-outlet *ngIf="!authService.isLoggedIn()"></router-outlet>
 </div>

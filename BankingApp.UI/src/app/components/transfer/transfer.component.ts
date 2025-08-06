@@ -39,6 +39,12 @@ export class TransferComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
   currentUser: any;
+  
+  // New properties for the template
+  showConfirm = false;
+  conversionLoading = false;
+  conversionError = '';
+  convertedAmount = 0;
 
   constructor(
     private transferService: TransferService,
@@ -145,5 +151,65 @@ export class TransferComponent implements OnInit {
 
   getToAccount(): Account | undefined {
     return this.accounts.find(a => a.accountId === this.transferRequest.toAccountId);
+  }
+
+  // New methods for the template
+  updatePreview(): void {
+    this.clearMessages();
+    
+    // If currencies are different, calculate conversion
+    const fromAccount = this.getFromAccount();
+    const toAccount = this.getToAccount();
+    
+    if (fromAccount && toAccount && fromAccount.currency !== toAccount.currency && this.transferRequest.amount > 0) {
+      this.calculateConversion();
+    } else {
+      this.convertedAmount = this.transferRequest.amount;
+      this.conversionError = '';
+    }
+  }
+
+  async calculateConversion(): Promise<void> {
+    const fromAccount = this.getFromAccount();
+    const toAccount = this.getToAccount();
+    
+    if (!fromAccount || !toAccount) return;
+    
+    try {
+      this.conversionLoading = true;
+      this.conversionError = '';
+      
+      // For now, use hardcoded rates (matching the backend)
+      const rates: { [key: string]: { [key: string]: number } } = {
+        'TL': { 'EUR': 0.029, 'USD': 0.031 },
+        'EUR': { 'TL': 34.50, 'USD': 1.08 },
+        'USD': { 'TL': 32.50, 'EUR': 0.93 }
+      };
+      
+      const rate = rates[fromAccount.currency]?.[toAccount.currency] || 1;
+      this.convertedAmount = this.transferRequest.amount * rate;
+    } catch (error) {
+      console.error('Error calculating conversion:', error);
+      this.conversionError = 'Döviz çevirisi hesaplanamadı';
+    } finally {
+      this.conversionLoading = false;
+    }
+  }
+
+  requestTransfer(): void {
+    if (!this.validateTransfer()) {
+      return;
+    }
+    
+    this.showConfirm = true;
+  }
+
+  async confirmTransfer(): Promise<void> {
+    this.showConfirm = false;
+    await this.createTransfer();
+  }
+
+  cancelConfirm(): void {
+    this.showConfirm = false;
   }
 } 

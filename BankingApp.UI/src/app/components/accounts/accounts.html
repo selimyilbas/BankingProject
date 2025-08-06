@@ -1,0 +1,103 @@
+<div class="accounts-container">
+  <div class="page-header">
+    <h1>Hesaplarım</h1>
+    <button class="refresh-btn" (click)="refreshAccounts()" [disabled]="loading">
+      <i class="fas fa-sync-alt" [class.spinning]="loading"></i>
+      Yenile
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="vakifbank-spinner"></div>
+    <p>Hesaplarınız yükleniyor...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="alert alert-danger">
+    <i class="fas fa-exclamation-circle"></i>
+    {{ error }}
+  </div>
+
+  <!-- Total Balances Summary -->
+  <div *ngIf="!loading && !error && accounts.length > 0" class="total-balances">
+    <h2>Toplam Bakiyeler</h2>
+    <div class="balance-summary">
+      <div class="balance-card total-tl" *ngIf="totalBalances.TL > 0">
+        <div class="currency-icon">₺</div>
+        <div class="balance-info">
+          <span class="currency-name">Türk Lirası</span>
+          <span class="balance-amount">{{ formatCurrency(totalBalances.TL, 'TL') }} TL</span>
+        </div>
+      </div>
+      <div class="balance-card total-usd" *ngIf="totalBalances.USD > 0">
+        <div class="currency-icon">$</div>
+        <div class="balance-info">
+          <span class="currency-name">Amerikan Doları</span>
+          <span class="balance-amount">{{ formatCurrency(totalBalances.USD, 'USD') }} USD</span>
+        </div>
+      </div>
+      <div class="balance-card total-eur" *ngIf="totalBalances.EUR > 0">
+        <div class="currency-icon">€</div>
+        <div class="balance-info">
+          <span class="currency-name">Euro</span>
+          <span class="balance-amount">{{ formatCurrency(totalBalances.EUR, 'EUR') }} EUR</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accounts List -->
+  <div *ngIf="!loading && !error" class="accounts-list">
+    <div *ngIf="accounts.length === 0" class="no-accounts">
+      <i class="fas fa-piggy-bank"></i>
+      <p>Henüz hiç hesabınız bulunmamaktadır.</p>
+      <a routerLink="/account/create" class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Yeni Hesap Aç
+      </a>
+    </div>
+
+    <div *ngIf="accounts.length > 0" class="accounts-grid">
+      <div *ngFor="let account of accounts" class="account-card" [ngClass]="getCurrencyClass(account.currency)">
+        <div class="account-header">
+          <span class="account-type">{{ getAccountTypeText(account.currency) }}</span>
+          <span class="account-status" [class.active]="account.isActive">
+            <i class="fas" [class.fa-check-circle]="account.isActive" [class.fa-times-circle]="!account.isActive"></i>
+            {{ account.isActive ? 'Aktif' : 'Pasif' }}
+          </span>
+        </div>
+        
+        <div class="account-number">
+          <i class="fas fa-credit-card"></i>
+          {{ account.accountNumber }}
+        </div>
+        
+        <div class="account-balance">
+          <span class="currency-symbol">{{ getCurrencyIcon(account.currency) }}</span>
+          <span class="amount">{{ formatCurrency(account.balance, account.currency) }}</span>
+          <span class="currency-code">{{ account.currency }}</span>
+        </div>
+        
+        <div class="account-actions">
+          <button class="action-btn" routerLink="/deposit" [queryParams]="{accountId: account.accountId}">
+            <i class="fas fa-plus-circle"></i>
+            Para Yatır
+          </button>
+          <button class="action-btn" routerLink="/transfer" [queryParams]="{fromAccountId: account.accountId}">
+            <i class="fas fa-exchange-alt"></i>
+            Transfer
+          </button>
+          <button class="action-btn" routerLink="/transaction-history" [queryParams]="{accountId: account.accountId}">
+            <i class="fas fa-history"></i>
+            İşlemler
+          </button>
+        </div>
+        
+        <div class="account-footer">
+          <small>Açılış Tarihi: {{ account.createdDate | date:'dd.MM.yyyy' }}</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
