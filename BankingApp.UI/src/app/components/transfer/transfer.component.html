@@ -95,25 +95,14 @@
       {{ errorMessage }}
     </div>
 
-    <!-- Confirm Box -->
-    <div *ngIf="showConfirm" class="confirm-box vakifbank-alert vakifbank-alert-warning">
-      <p>
-        {{ transferRequest.amount | number:'1.2-2' }} {{ getFromAccount()?.currency }}
-        <span *ngIf="getFromAccount()?.currency !== getToAccount()?.currency">
-          ≈ {{ convertedAmount | number:'1.2-2' }} {{ getToAccount()?.currency }}
-        </span>
-        tutarındaki transferi onaylıyor musunuz?
-      </p>
-      <button type="button" class="btn btn-primary" (click)="confirmTransfer()" [disabled]="loading">Onayla</button>
-      <button type="button" class="btn btn-secondary" (click)="cancelConfirm()" [disabled]="loading">İptal</button>
-    </div>
+
 
     <!-- Action Buttons -->
-    <div class="form-actions" *ngIf="!showConfirm">
+    <div class="form-actions">
       <button 
         type="button" 
         class="btn btn-primary"
-        (click)="requestTransfer()"
+        (click)="createTransfer()"
         [disabled]="loading || !transferRequest.fromAccountId || !transferRequest.toAccountId || !transferRequest.amount">
         <span *ngIf="!loading">Transfer Yap</span>
         <span *ngIf="loading">

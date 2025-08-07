@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TransferService } from '../../services/transfer.service';
-import { AccountService } from '../../services/account.service';
-import { AuthService } from '../../services/auth.service';
+import { TransferService } from '../../services/transfer';
+import { AccountService } from '../../services/account';
+import { AuthService } from '../../services/auth';
+
 
 interface Account {
   accountId: number;
@@ -41,7 +42,6 @@ export class TransferComponent implements OnInit {
   currentUser: any;
   
   // New properties for the template
-  showConfirm = false;
   conversionLoading = false;
   conversionError = '';
   convertedAmount = 0;
@@ -54,20 +54,43 @@ export class TransferComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
-    this.loadAccounts();
+    if (this.currentUser) {
+      this.loadAccounts();
+    } else {
+      // Kullanıcı henüz yüklenmediyse, yüklendiğinde hesapları getir
+      const sub = this.authService.currentUser$.subscribe(user => {
+        if (user) {
+          this.currentUser = user;
+          this.loadAccounts();
+          sub.unsubscribe();
+        }
+      });
+    }
   }
 
   async loadAccounts(): Promise<void> {
     try {
       this.loading = true;
-      const response = await this.accountService.getAccountsByCustomer(this.currentUser.customerId).toPromise();
-      
-      if (response && response.success) {
-        this.accounts = response.data;
-        if (this.accounts.length > 0) {
-          this.transferRequest.fromAccountId = this.accounts[0].accountId;
+      this.accountService.getAccountsByCustomerId(this.currentUser.customerId).subscribe({
+        next: (response) => {
+          if (response && response.success) {
+            this.accounts = response.data || [];
+            if (this.accounts.length > 0) {
+              this.transferRequest.fromAccountId = this.accounts[0].accountId;
+            }
+          } else {
+            this.errorMessage = response?.message || 'Hesaplar yüklenemedi';
+          }
+        },
+        error: (err) => {
+          console.error('Error loading accounts:', err);
+          this.errorMessage = 'Hesaplar yüklenirken hata oluştu';
+          this.loading = false;
+        },
+        complete: () => {
+          this.loading = false;
         }
-      }
+      });
     } catch (error) {
       console.error('Error loading accounts:', error);
       this.errorMessage = 'Hesaplar yüklenirken hata oluştu';
@@ -76,30 +99,39 @@ export class TransferComponent implements OnInit {
     }
   }
 
-  async createTransfer(): Promise<void> {
+  createTransfer(): void {
     if (!this.validateTransfer()) {
       return;
     }
 
-    try {
-      this.loading = true;
-      this.clearMessages();
+    this.loading = true;
+    this.clearMessages();
 
-      const response = await this.transferService.createTransfer(this.transferRequest).toPromise();
-      
-      if (response && response.success) {
-        this.successMessage = 'Transfer başarıyla tamamlandı!';
-        this.resetForm();
-        this.loadAccounts(); // Refresh account balances
-      } else {
-        this.errorMessage = response?.message || 'Transfer işlemi başarısız';
+    const payload = {
+      fromAccountId: this.transferRequest.fromAccountId,
+      toAccountId: this.transferRequest.toAccountId,
+      amount: this.transferRequest.amount,
+      description: this.transferRequest.description
+    };
+
+    this.transferService.createTransfer(payload as any).subscribe({
+      next: (response) => {
+        if (response && response.success) {
+          this.successMessage = 'Transfer başarıyla tamamlandı!';
+          this.resetForm();
+          this.loadAccounts();
+        } else {
+          this.errorMessage = response?.message || 'Transfer işlemi başarısız';
+        }
+      },
+      error: (error) => {
+        console.error('Error creating transfer:', error);
+        this.errorMessage = 'Transfer işlemi sırasında hata oluştu';
+      },
+      complete: () => {
+        this.loading = false;
       }
-    } catch (error) {
-      console.error('Error creating transfer:', error);
-      this.errorMessage = 'Transfer işlemi sırasında hata oluştu';
-    } finally {
-      this.loading = false;
-    }
+    });
   }
 
   validateTransfer(): boolean {
@@ -200,16 +232,16 @@ export class TransferComponent implements OnInit {
     if (!this.validateTransfer()) {
       return;
     }
-    
-    this.showConfirm = true;
+    // Do transfer directly without extra confirmation step
+    this.confirmTransfer();
   }
 
   async confirmTransfer(): Promise<void> {
-    this.showConfirm = false;
+    
     await this.createTransfer();
   }
 
   cancelConfirm(): void {
-    this.showConfirm = false;
+    
   }
 } 
