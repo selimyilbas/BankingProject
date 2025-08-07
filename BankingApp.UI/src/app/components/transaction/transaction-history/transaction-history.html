@@ -1,1 +1,155 @@
-<p>transaction-history works!</p>
+<div class="transaction-history-container">
+  <div class="header">
+    <h2><i class="fas fa-file-alt"></i> İşlem Geçmişi</h2>
+  </div>
+
+  <!-- Account Selection and Filters -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label for="accountSelect">Hesap Seçin:</label>
+        <select 
+          id="accountSelect" 
+          [(ngModel)]="selectedAccountId" 
+          (change)="onAccountChange()"
+          class="form-control">
+          <option *ngFor="let account of accounts" [value]="account.accountId">
+            {{getAccountDisplayName(account)}}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="startDate">Başlangıç Tarihi:</label>
+        <input 
+          type="date" 
+          id="startDate"
+          [(ngModel)]="startDate"
+          class="form-control">
+      </div>
+
+      <div class="filter-group">
+        <label for="endDate">Bitiş Tarihi:</label>
+        <input 
+          type="date" 
+          id="endDate"
+          [(ngModel)]="endDate"
+          class="form-control">
+      </div>
+
+      <div class="filter-actions">
+        <button 
+          type="button" 
+          class="btn btn-primary" 
+          (click)="onDateFilter()"
+          [disabled]="!startDate || !endDate">
+          <i class="fas fa-filter"></i> Filtrele
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-secondary" 
+          (click)="clearDateFilter()">
+          <i class="fas fa-times"></i> Temizle
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>İşlem geçmişi yükleniyor...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>{{error}}</span>
+  </div>
+
+  <!-- Transactions Table -->
+  <div *ngIf="!loading && !error" class="transactions-section">
+    <div *ngIf="transactions.length === 0" class="no-transactions">
+      <i class="fas fa-inbox"></i>
+      <h3>İşlem Bulunamadı</h3>
+      <p>Seçilen kriterlere uygun işlem bulunmamaktadır.</p>
+    </div>
+
+    <div *ngIf="transactions.length > 0" class="transactions-table-container">
+      <!-- Results Info -->
+      <div class="results-info">
+        <p>
+          <strong>{{totalTransactions}}</strong> işlemden 
+          <strong>{{startIndex}}-{{endIndex}}</strong> arası gösteriliyor
+        </p>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="table-responsive">
+        <table class="transactions-table">
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>İşlem Kodu</th>
+              <th>İşlem Türü</th>
+              <th>Tutar</th>
+              <th>Para Birimi</th>
+              <th>Kur Oranı</th>
+              <th>Açıklama</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let transaction of transactions" class="transaction-row">
+              <td class="transaction-date">
+                {{formatDate(transaction.transactionDate)}}
+              </td>
+              <td class="transaction-code">
+                {{transaction.transactionCode}}
+              </td>
+              <td class="transaction-type">
+                <span [class]="getTransactionTypeClass(transaction.transactionType)">
+                  {{getTransactionTypeText(transaction.transactionType)}}
+                </span>
+              </td>
+              <td class="transaction-amount" [class]="getTransactionTypeClass(transaction.transactionType)">
+                {{formatCurrency(transaction.amount, transaction.currency)}}
+              </td>
+              <td class="transaction-currency">
+                {{transaction.currency}}
+              </td>
+              <td class="transaction-rate">
+                {{transaction.exchangeRate ? transaction.exchangeRate.toFixed(4) : '-'}}
+              </td>
+              <td class="transaction-description">
+                {{transaction.description || '-'}}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div *ngIf="totalPages > 1" class="pagination-container">
+        <div class="pagination">
+          <button 
+            class="pagination-btn" 
+            [disabled]="currentPage === 1"
+            (click)="onPageChange(currentPage - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+
+          <span class="pagination-info">
+            Sayfa {{currentPage}} / {{totalPages}}
+          </span>
+
+          <button 
+            class="pagination-btn" 
+            [disabled]="currentPage === totalPages"
+            (click)="onPageChange(currentPage + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

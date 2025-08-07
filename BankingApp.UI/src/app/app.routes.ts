@@ -8,6 +8,7 @@ import { AccountCreateComponent } from './components/account/account-create/acco
 import { DepositComponent } from './components/transaction/deposit/deposit';
 import { AccountsComponent } from './components/accounts/accounts';
 import { ExchangeRatesComponent } from './components/exchange-rates/exchange-rates';
+import { TransactionHistoryComponent } from './components/transaction/transaction-history/transaction-history';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -18,6 +19,7 @@ export const routes: Routes = [
   { path: 'account/create', component: AccountCreateComponent },
   { path: 'deposit', component: DepositComponent },
   { path: 'transfer', component: TransferComponent },
+  { path: 'transactions', component: TransactionHistoryComponent },
   { path: 'exchange-rates', component: ExchangeRatesComponent },
   { path: '**', redirectTo: '/login' }
 ];
