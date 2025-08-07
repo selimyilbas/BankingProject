@@ -1,4 +1,4 @@
-# 🏦 VakıfBank Banking Application
+#  VakıfBank Banking Application
 
 A full-stack banking application developed as an internship project, featuring real-time exchange rates, multi-currency accounts, secure transactions, and modern UI/UX design.
 
