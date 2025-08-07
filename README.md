@@ -2,6 +2,8 @@
 
 A full-stack banking application developed as an internship project, featuring real-time exchange rates, multi-currency accounts, secure transactions, and modern UI/UX design.
 
+> 📈 **Son Güncellemeler**: Para transfer sistemi optimize edildi ve bakiye güncellemeleri gerçek zamanlı hale getirildi.
+
 ![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
 ![.NET](https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=.net&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
