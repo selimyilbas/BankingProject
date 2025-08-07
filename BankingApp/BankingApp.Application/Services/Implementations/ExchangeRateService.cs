@@ -18,7 +18,10 @@ namespace BankingApp.Application.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ExchangeRateService> _logger;
         private readonly HttpClient _httpClient;
-        private const string EXCHANGE_API_BASE_URL = "https://api.exchangerate-api.com/v4/latest";
+        // Primary endpoint - Uses frankfurter.app for real-time currency data
+        private const string PRIMARY_API_BASE_URL = "https://api.frankfurter.app/latest";
+        // Fallback API endpoint in case the primary API fails
+        private const string FALLBACK_API_BASE_URL = "https://api.exchangerate-api.com/v4/latest";
 
         public ExchangeRateService(IUnitOfWork unitOfWork, ILogger<ExchangeRateService> logger, HttpClient httpClient)
         {
@@ -157,37 +160,31 @@ namespace BankingApp.Application.Services.Implementations
 
                 _logger.LogInformation("Fetching current exchange rates directly from API (no cache)");
 
-                // Get USD/TRY rate directly from API - no database fallback
+                // Get USD/TRY rate using the new API system
                 try
                 {
-                    var url = $"{EXCHANGE_API_BASE_URL}/USD";
-                    var httpResponse = await _httpClient.GetAsync(url);
-                    if (httpResponse.IsSuccessStatusCode)
+                    var usdToTryRate = await GetRateFromApiAsync("USD", "TRY");
+                    if (usdToTryRate.HasValue)
                     {
-                        var jsonString = await httpResponse.Content.ReadAsStringAsync();
-                        using var document = JsonDocument.Parse(jsonString);
-                        var root = document.RootElement;
+                        hasRealRates = true;
                         
-                        if (root.TryGetProperty("rates", out var ratesElement) && 
-                            ratesElement.TryGetProperty("TRY", out var tryRateElement))
-                        {
-                            var usdToTryRate = tryRateElement.GetDecimal();
-                            hasRealRates = true;
-                            
-                            var spreadPercent = 0.005m; // 0.5% spread
-                            var buyRate = usdToTryRate * (1 - spreadPercent);
-                            var sellRate = usdToTryRate * (1 + spreadPercent);
+                        var spreadPercent = 0.005m; // 0.5% spread
+                        var buyRate = usdToTryRate.Value * (1 - spreadPercent);
+                        var sellRate = usdToTryRate.Value * (1 + spreadPercent);
 
-                            exchangeRates.Add(new ExchangeRateDisplayDto
-                            {
-                                Currency = "USD",
-                                CurrencyName = "Amerikan Doları",
-                                BuyRate = Math.Round(buyRate, 4),
-                                SellRate = Math.Round(sellRate, 4)
-                            });
-                            
-                            _logger.LogInformation("✅ Real USD/TRY rate: {Rate}", usdToTryRate);
-                        }
+                        exchangeRates.Add(new ExchangeRateDisplayDto
+                        {
+                            Currency = "USD",
+                            CurrencyName = "Amerikan Doları",
+                            BuyRate = Math.Round(buyRate, 4),
+                            SellRate = Math.Round(sellRate, 4)
+                        });
+                        
+                        _logger.LogInformation("✅ Real USD/TRY rate: {Rate}", usdToTryRate);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("❌ Could not get USD/TRY rate from any API");
                     }
                 }
                 catch (Exception ex)
@@ -195,37 +192,31 @@ namespace BankingApp.Application.Services.Implementations
                     _logger.LogError(ex, "❌ Failed to get USD/TRY rate from API");
                 }
 
-                // Get EUR/TRY rate directly from API - no database fallback
+                // Get EUR/TRY rate using the new API system
                 try
                 {
-                    var url = $"{EXCHANGE_API_BASE_URL}/EUR";
-                    var httpResponse = await _httpClient.GetAsync(url);
-                    if (httpResponse.IsSuccessStatusCode)
+                    var eurToTryRate = await GetRateFromApiAsync("EUR", "TRY");
+                    if (eurToTryRate.HasValue)
                     {
-                        var jsonString = await httpResponse.Content.ReadAsStringAsync();
-                        using var document = JsonDocument.Parse(jsonString);
-                        var root = document.RootElement;
+                        hasRealRates = true;
                         
-                        if (root.TryGetProperty("rates", out var ratesElement) && 
-                            ratesElement.TryGetProperty("TRY", out var tryRateElement))
-                        {
-                            var eurToTryRate = tryRateElement.GetDecimal();
-                            hasRealRates = true;
-                            
-                            var spreadPercent = 0.005m; // 0.5% spread
-                            var buyRate = eurToTryRate * (1 - spreadPercent);
-                            var sellRate = eurToTryRate * (1 + spreadPercent);
+                        var spreadPercent = 0.005m; // 0.5% spread
+                        var buyRate = eurToTryRate.Value * (1 - spreadPercent);
+                        var sellRate = eurToTryRate.Value * (1 + spreadPercent);
 
-                            exchangeRates.Add(new ExchangeRateDisplayDto
-                            {
-                                Currency = "EUR",
-                                CurrencyName = "Euro",
-                                BuyRate = Math.Round(buyRate, 4),
-                                SellRate = Math.Round(sellRate, 4)
-                            });
-                            
-                            _logger.LogInformation("✅ Real EUR/TRY rate: {Rate}", eurToTryRate);
-                        }
+                        exchangeRates.Add(new ExchangeRateDisplayDto
+                        {
+                            Currency = "EUR",
+                            CurrencyName = "Euro",
+                            BuyRate = Math.Round(buyRate, 4),
+                            SellRate = Math.Round(sellRate, 4)
+                        });
+                        
+                        _logger.LogInformation("✅ Real EUR/TRY rate: {Rate}", eurToTryRate);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("❌ Could not get EUR/TRY rate from any API");
                     }
                 }
                 catch (Exception ex)
@@ -257,67 +248,103 @@ namespace BankingApp.Application.Services.Implementations
 
         private async Task<decimal?> GetRateFromApiAsync(string fromCurrency, string toCurrency)
         {
+            // Try primary API first (frankfurter.app)
+            var rate = await TryGetRateFromApi(PRIMARY_API_BASE_URL, fromCurrency, toCurrency, "Primary API (frankfurter.app)");
+            if (rate.HasValue)
+            {
+                return rate;
+            }
+
+            // Fallback to secondary API (exchangerate-api.com)
+            rate = await TryGetRateFromApi(FALLBACK_API_BASE_URL, fromCurrency, toCurrency, "Fallback API (exchangerate-api.com)");
+            return rate;
+        }
+
+        private async Task<decimal?> TryGetRateFromApi(string baseUrl, string fromCurrency, string toCurrency, string apiName)
+        {
             try
             {
-                // Simplified: always fetch USD base for reliable free-tier support
-                var url = $"{EXCHANGE_API_BASE_URL}/USD";
-                _logger.LogInformation("Fetching exchange rate from: {Url}", url);
+                // Use EUR as base for frankfurter.app, USD for exchangerate-api.com
+                var baseCurrency = baseUrl.Contains("frankfurter") ? "EUR" : "USD";
+                var url = $"{baseUrl}?base={baseCurrency}";
+                
+                _logger.LogInformation("Fetching exchange rate from {ApiName}: {Url}", apiName, url);
 
                 var response = await _httpClient.GetAsync(url);
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogWarning("API request failed with status: {StatusCode}", response.StatusCode);
+                    _logger.LogWarning("{ApiName} request failed with status: {StatusCode}", apiName, response.StatusCode);
                     return null;
                 }
 
                 var jsonString = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("API Response JSON: {JsonString}", jsonString.Substring(0, Math.Min(200, jsonString.Length)));
+                _logger.LogInformation("{ApiName} Response JSON: {JsonString}", apiName, jsonString.Substring(0, Math.Min(200, jsonString.Length)));
                 
-                // Parse JSON manually to avoid DTO property mapping issues
                 using var document = JsonDocument.Parse(jsonString);
                 var root = document.RootElement;
                 
-                if (root.TryGetProperty("rates", out var ratesElement))
+                if (!root.TryGetProperty("rates", out var ratesElement))
                 {
-                    decimal? crossRate = null;
+                    _logger.LogWarning("No rates property found in {ApiName} response", apiName);
+                    return null;
+                }
+
+                decimal? crossRate = null;
+                
+                // Handle direct conversions and cross-rates
+                if (fromCurrency == baseCurrency)
+                {
+                    // Direct rate from base currency
                     if (ratesElement.TryGetProperty(toCurrency, out var toRateElem))
                     {
-                        var toRate = toRateElem.GetDecimal();
-                        if (fromCurrency == "USD")
-                        {
-                            crossRate = toRate; // USD → X
-                        }
-                        else if (ratesElement.TryGetProperty(fromCurrency, out var fromRateElem))
-                        {
-                            var fromRate = fromRateElem.GetDecimal();
-                            if (fromRate > 0)
-                            {
-                                crossRate = toRate / fromRate; // cross via USD
-                            }
-                        }
+                        crossRate = toRateElem.GetDecimal();
                     }
-                    if (crossRate.HasValue)
+                }
+                else if (toCurrency == baseCurrency)
+                {
+                    // Inverse rate to base currency
+                    if (ratesElement.TryGetProperty(fromCurrency, out var fromRateElem))
                     {
-                        _logger.LogInformation("Cross rate {FromCurrency}-{ToCurrency}: {Rate}", fromCurrency, toCurrency, crossRate);
-                        return crossRate;
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Currency {ToCurrency} not found in API rates", toCurrency);
+                        var fromRate = fromRateElem.GetDecimal();
+                        if (fromRate > 0)
+                        {
+                            crossRate = 1 / fromRate;
+                        }
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("No rates property found in API response");
+                    // Cross rate via base currency
+                    if (ratesElement.TryGetProperty(fromCurrency, out var fromRateElem) &&
+                        ratesElement.TryGetProperty(toCurrency, out var toRateElem))
+                    {
+                        var fromRate = fromRateElem.GetDecimal();
+                        var toRate = toRateElem.GetDecimal();
+                        if (fromRate > 0)
+                        {
+                            crossRate = toRate / fromRate;
+                        }
+                    }
                 }
 
-                _logger.LogWarning("Currency {ToCurrency} not found in API response", toCurrency);
+                if (crossRate.HasValue)
+                {
+                    _logger.LogInformation("✅ {ApiName} - Cross rate {FromCurrency}-{ToCurrency}: {Rate}", 
+                        apiName, fromCurrency, toCurrency, crossRate);
+                    return crossRate;
+                }
+                else
+                {
+                    _logger.LogWarning("❌ {ApiName} - Currency pair {FromCurrency}-{ToCurrency} not found", 
+                        apiName, fromCurrency, toCurrency);
+                }
+
                 return null;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error calling exchange rate API for {FromCurrency}-{ToCurrency}", 
-                    fromCurrency, toCurrency);
+                _logger.LogError(ex, "❌ Error calling {ApiName} for {FromCurrency}-{ToCurrency}", 
+                    apiName, fromCurrency, toCurrency);
                 return null;
             }
         }
