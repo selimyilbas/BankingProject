@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AccountService } from '../../../services/account';
 import { TransactionService } from '../../../services/transaction';
 import { AuthService } from '../../../services/auth';
@@ -28,7 +28,8 @@ export class DepositComponent implements OnInit {
     private accountService: AccountService,
     private transactionService: TransactionService,
     private authService: AuthService,
-    public router: Router
+    public router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -37,11 +38,23 @@ export class DepositComponent implements OnInit {
       this.router.navigate(['/login']);
       return;
     }
+    
+    // Get accountId from query parameters
+    const accountId = this.route.snapshot.queryParams['accountId'];
+    
     this.accountService
       .getAccountsByCustomerId(user.customerId)
       .subscribe((res) => {
         if (res.success) {
           this.accounts = res.data ?? [];
+          
+          // Pre-select account if accountId was provided
+          if (accountId && this.accounts.length > 0) {
+            const selectedAccount = this.accounts.find(account => account.accountId.toString() === accountId);
+            if (selectedAccount) {
+              this.selectedAccountNumber = selectedAccount.accountNumber;
+            }
+          }
         }
       });
   }

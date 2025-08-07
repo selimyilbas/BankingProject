@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TransactionService } from '../../../services/transaction';
 import { AccountService } from '../../../services/account';
 import { AuthService } from '../../../services/auth';
@@ -33,7 +34,8 @@ export class TransactionHistoryComponent implements OnInit {
   constructor(
     private transactionService: TransactionService,
     private accountService: AccountService,
-    private authService: AuthService
+    private authService: AuthService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit() {
@@ -47,13 +49,26 @@ export class TransactionHistoryComponent implements OnInit {
       return;
     }
 
+    // Get accountId from query parameters
+    const accountId = this.route.snapshot.queryParams['accountId'];
+
     this.loading = true;
     this.accountService.getAccountsByCustomerId(currentUser.customerId).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.accounts = response.data;
           if (this.accounts.length > 0) {
-            this.selectedAccountId = this.accounts[0].accountId;
+            // Pre-select account if accountId was provided
+            if (accountId) {
+              const selectedAccount = this.accounts.find(account => account.accountId.toString() === accountId);
+              if (selectedAccount) {
+                this.selectedAccountId = selectedAccount.accountId;
+              } else {
+                this.selectedAccountId = this.accounts[0].accountId;
+              }
+            } else {
+              this.selectedAccountId = this.accounts[0].accountId;
+            }
             this.loadTransactions();
           }
         } else {

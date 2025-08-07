@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { AccountService, Account as ServiceAccount } from '../../services/account.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -23,7 +23,8 @@ export class AccountsComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private authService: AuthService
+    private authService: AuthService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -126,5 +127,18 @@ export class AccountsComponent implements OnInit {
     this.loading = true;
     this.error = '';
     this.loadAccounts();
+  }
+
+  // Navigation methods
+  navigateToDeposit(accountId: number): void {
+    this.router.navigate(['/deposit'], { queryParams: { accountId: accountId } });
+  }
+
+  navigateToTransfer(accountId: number): void {
+    this.router.navigate(['/transfer'], { queryParams: { fromAccountId: accountId } });
+  }
+
+  navigateToTransactions(accountId: number): void {
+    this.router.navigate(['/transaction-history'], { queryParams: { accountId: accountId } });
   }
 }

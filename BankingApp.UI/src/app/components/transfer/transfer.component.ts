@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TransferService } from '../../services/transfer';
 import { AccountService } from '../../services/account';
 import { AuthService } from '../../services/auth';
@@ -49,7 +50,8 @@ export class TransferComponent implements OnInit {
   constructor(
     private transferService: TransferService,
     private accountService: AccountService,
-    private authService: AuthService
+    private authService: AuthService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -71,12 +73,26 @@ export class TransferComponent implements OnInit {
   async loadAccounts(): Promise<void> {
     try {
       this.loading = true;
+      
+      // Get fromAccountId from query parameters
+      const fromAccountId = this.route.snapshot.queryParams['fromAccountId'];
+      
       this.accountService.getAccountsByCustomerId(this.currentUser.customerId).subscribe({
         next: (response) => {
           if (response && response.success) {
             this.accounts = response.data || [];
             if (this.accounts.length > 0) {
-              this.transferRequest.fromAccountId = this.accounts[0].accountId;
+              // Pre-select account if fromAccountId was provided
+              if (fromAccountId) {
+                const selectedAccount = this.accounts.find(account => account.accountId.toString() === fromAccountId);
+                if (selectedAccount) {
+                  this.transferRequest.fromAccountId = selectedAccount.accountId;
+                } else {
+                  this.transferRequest.fromAccountId = this.accounts[0].accountId;
+                }
+              } else {
+                this.transferRequest.fromAccountId = this.accounts[0].accountId;
+              }
             }
           } else {
             this.errorMessage = response?.message || 'Hesaplar yüklenemedi';

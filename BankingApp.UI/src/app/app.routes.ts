@@ -19,7 +19,8 @@ export const routes: Routes = [
   { path: 'account/create', component: AccountCreateComponent },
   { path: 'deposit', component: DepositComponent },
   { path: 'transfer', component: TransferComponent },
-  { path: 'transactions', component: TransactionHistoryComponent },
+  { path: 'transaction-history', component: TransactionHistoryComponent },
+  { path: 'transactions', component: TransactionHistoryComponent }, // For sidebar compatibility
   { path: 'exchange-rates', component: ExchangeRatesComponent },
   { path: '**', redirectTo: '/login' }
 ];

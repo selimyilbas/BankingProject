@@ -324,6 +324,8 @@
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
+  z-index: 5;
+  position: relative;
 }
 
 .action-btn {
@@ -341,13 +343,23 @@
   align-items: center;
   gap: 5px;
   text-decoration: none;
+  font-family: inherit;
+  outline: none;
+  pointer-events: auto;
+  z-index: 10;
+  position: relative;
 }
 
-.action-btn:hover {
+.action-btn:hover,
+.action-btn:focus {
   background: #F5C842;
   border-color: #F5C842;
   color: #333;
   transform: translateY(-1px);
+}
+
+.action-btn:active {
+  transform: translateY(0);
 }
 
 .action-btn i {
