@@ -9,6 +9,7 @@ import { AccountCreateComponent } from './components/account/account-create/acco
 import { DepositComponent } from './components/transaction/deposit/deposit';
 import { AccountsComponent } from './components/accounts/accounts';
 import { ExchangeRatesComponent } from './components/exchange-rates/exchange-rates';
+import { CurrencyConverterComponent } from './components/exchange-rates/currency-converter/currency-converter';
 import { TransactionHistoryComponent } from './components/transaction/transaction-history/transaction-history';
 
 export const routes: Routes = [
@@ -24,5 +25,6 @@ export const routes: Routes = [
   { path: 'transactions', component: TransactionHistoryComponent }, // For sidebar compatibility
   { path: 'transfers', component: TransferHistoryComponent },
   { path: 'exchange-rates', component: ExchangeRatesComponent },
+  { path: 'converter', component: CurrencyConverterComponent },
   { path: '**', redirectTo: '/login' }
 ];
