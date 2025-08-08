@@ -1,1 +1,50 @@
-<p>transfer-history works!</p>
+<div class="transfer-history-container">
+  <div class="header">
+    <h2><i class="fas fa-history"></i> Transfer Geçmişi</h2>
+  </div>
+
+  <div class="filters">
+    <label>Hesap Seçin</label>
+    <select [(ngModel)]="selectedAccountId" (ngModelChange)="loadTransfers()" class="form-control">
+      <option *ngFor="let a of accounts" [value]="a.accountId">{{ a.accountNumber }} ({{ a.currency }})</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner vakifbank-spinner"></div>
+    <p>Yükleniyor...</p>
+  </div>
+
+  <div *ngIf="!loading && error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="!loading && !error">
+    <div class="table-responsive">
+      <table class="vakifbank-table">
+        <thead>
+          <tr>
+            <th>Tarih</th>
+            <th>Transfer Kodu</th>
+            <th>Kaynak Hesap</th>
+            <th>Hedef Hesap</th>
+            <th>Tutar</th>
+            <th>Kur</th>
+            <th>Dönüştürülen</th>
+            <th>Açıklama</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of transfers">
+            <td>{{ t.transferDate | date:'dd.MM.yyyy HH:mm:ss' }}</td>
+            <td>{{ t.transferCode }}</td>
+            <td>{{ t.fromAccountNumber }} ({{ t.fromCurrency }})</td>
+            <td>{{ t.toAccountNumber }} ({{ t.toCurrency }})</td>
+            <td>{{ t.amount | number:'1.2-2' }} {{ t.fromCurrency }}</td>
+            <td>{{ t.exchangeRate || 1 | number:'1.4-4' }}</td>
+            <td>{{ t.convertedAmount | number:'1.2-2' }} {{ t.toCurrency }}</td>
+            <td>{{ t.description || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

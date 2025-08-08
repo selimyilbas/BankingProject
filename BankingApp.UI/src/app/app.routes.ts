@@ -4,6 +4,7 @@ import { LoginComponent } from './components/auth/login/login';
 import { RegisterComponent } from './components/auth/register/register';
 import { DashboardComponent } from './components/dashboard/dashboard';
 import { TransferComponent } from './components/transfer/transfer.component';
+import { TransferHistoryComponent } from './components/transfer/transfer-history/transfer-history';
 import { AccountCreateComponent } from './components/account/account-create/account-create';
 import { DepositComponent } from './components/transaction/deposit/deposit';
 import { AccountsComponent } from './components/accounts/accounts';
@@ -21,6 +22,7 @@ export const routes: Routes = [
   { path: 'transfer', component: TransferComponent },
   { path: 'transaction-history', component: TransactionHistoryComponent },
   { path: 'transactions', component: TransactionHistoryComponent }, // For sidebar compatibility
+  { path: 'transfers', component: TransferHistoryComponent },
   { path: 'exchange-rates', component: ExchangeRatesComponent },
   { path: '**', redirectTo: '/login' }
 ];

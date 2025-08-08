@@ -119,6 +119,88 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        public async Task<ApiResponse<TransferDto>> CreateTransferByAccountNumberAsync(string fromAccountNumber, string toAccountNumber, decimal amount, string? description)
+        {
+            try
+            {
+                // Resolve accounts by account numbers
+                var fromAccount = await _unitOfWork.Accounts.GetByAccountNumberAsync(fromAccountNumber);
+                var toAccount = await _unitOfWork.Accounts.GetByAccountNumberAsync(toAccountNumber);
+
+                if (fromAccount == null || toAccount == null)
+                {
+                    return ApiResponse<TransferDto>.ErrorResponse("Hesap bulunamadı");
+                }
+
+                // Reuse validation logic by mapping to ID-based DTO
+                var validateDto = new CreateTransferDto
+                {
+                    FromAccountId = fromAccount.AccountId,
+                    ToAccountId = toAccount.AccountId,
+                    Amount = amount,
+                    Description = description
+                };
+
+                var validation = await ValidateTransferAsync(validateDto);
+                if (!validation.Success)
+                {
+                    return ApiResponse<TransferDto>.ErrorResponse(validation.Message);
+                }
+
+                // Exchange rate resolution
+                var fromCurrencyMapped = fromAccount.Currency == "TL" ? "TRY" : fromAccount.Currency;
+                var toCurrencyMapped = toAccount.Currency == "TL" ? "TRY" : toAccount.Currency;
+                var exchangeRateEntity = await _unitOfWork.ExchangeRates.GetCurrentRateAsync(fromCurrencyMapped, toCurrencyMapped);
+                decimal rate;
+                if (exchangeRateEntity == null)
+                {
+                    var rateResponse = await _exchangeRateService.GetExchangeRateAsync(fromCurrencyMapped, toCurrencyMapped);
+                    if (!rateResponse.Success || rateResponse.Data == 0)
+                    {
+                        return ApiResponse<TransferDto>.ErrorResponse("Döviz kuru bulunamadı");
+                    }
+                    rate = rateResponse.Data;
+                }
+                else
+                {
+                    rate = exchangeRateEntity.Rate;
+                }
+
+                var convertedAmount = amount * rate;
+
+                var transfer = new BankingApp.Domain.Entities.Transfer
+                {
+                    TransferCode = await _unitOfWork.Transfers.GenerateTransferCodeAsync(),
+                    FromAccountId = fromAccount.AccountId,
+                    ToAccountId = toAccount.AccountId,
+                    Amount = amount,
+                    FromCurrency = fromAccount.Currency,
+                    ToCurrency = toAccount.Currency,
+                    ExchangeRate = rate,
+                    ConvertedAmount = convertedAmount,
+                    Status = "COMPLETED",
+                    Description = description,
+                    TransferDate = DateTime.UtcNow,
+                    CompletedDate = DateTime.UtcNow
+                };
+
+                await _unitOfWork.Transfers.AddAsync(transfer);
+
+                fromAccount.Balance -= amount;
+                toAccount.Balance += convertedAmount;
+
+                await _unitOfWork.SaveChangesAsync();
+
+                var transferDto = _mapper.Map<TransferDto>(transfer);
+                return ApiResponse<TransferDto>.SuccessResponse(transferDto, "Transfer başarıyla tamamlandı");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating transfer by account number");
+                return ApiResponse<TransferDto>.ErrorResponse("Transfer oluşturulurken bir hata oluştu");
+            }
+        }
+
         public async Task<ApiResponse<TransferDto>> GetTransferByIdAsync(int transferId)
         {
             try
@@ -224,6 +306,34 @@ namespace BankingApp.Application.Services.Implementations
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating transfer");
+                return ApiResponse<object>.ErrorResponse("Transfer doğrulaması sırasında bir hata oluştu");
+            }
+        }
+
+        public async Task<ApiResponse<object>> ValidateTransferByAccountNumberAsync(string fromAccountNumber, string toAccountNumber, decimal amount)
+        {
+            try
+            {
+                var fromAccount = await _unitOfWork.Accounts.GetByAccountNumberAsync(fromAccountNumber);
+                var toAccount = await _unitOfWork.Accounts.GetByAccountNumberAsync(toAccountNumber);
+
+                if (fromAccount == null || toAccount == null)
+                {
+                    return ApiResponse<object>.ErrorResponse("Hesap bulunamadı");
+                }
+
+                var dto = new CreateTransferDto
+                {
+                    FromAccountId = fromAccount.AccountId,
+                    ToAccountId = toAccount.AccountId,
+                    Amount = amount
+                };
+
+                return await ValidateTransferAsync(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating transfer by account number");
                 return ApiResponse<object>.ErrorResponse("Transfer doğrulaması sırasında bir hata oluştu");
             }
         }

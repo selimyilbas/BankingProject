@@ -9,11 +9,20 @@ export interface CreateTransferDto {
   description: string;
 }
 
+export interface CreateTransferByAccountNumberDto {
+  fromAccountNumber: string;
+  toAccountNumber: string;
+  amount: number;
+  description?: string;
+}
+
 export interface TransferDto {
   transferId: number;
   transferCode: string;
   fromAccountId: number;
   toAccountId: number;
+  fromAccountNumber: string;
+  toAccountNumber: string;
   amount: number;
   fromCurrency: string;
   toCurrency: string;
@@ -39,7 +48,11 @@ export class TransferService {
   constructor(private api: ApiService) {}
 
   createTransfer(transferDto: CreateTransferDto): Observable<ApiResponse<TransferDto>> {
-    return this.api.post<ApiResponse<TransferDto>>('/Transfer', transferDto);
+    return this.api.post<ApiResponse<TransferDto>>('/transfer', transferDto);
+  }
+
+  createTransferByAccountNumber(dto: CreateTransferByAccountNumberDto): Observable<ApiResponse<TransferDto>> {
+    return this.api.post<ApiResponse<TransferDto>>('/transfer/by-account-number', dto);
   }
 
   getTransferById(transferId: number): Observable<ApiResponse<TransferDto>> {
@@ -47,14 +60,18 @@ export class TransferService {
   }
 
   getTransfersByAccount(accountId: number): Observable<ApiResponse<TransferDto[]>> {
-    return this.api.get<ApiResponse<TransferDto[]>>(`/Transfer/account/${accountId}`);
+    return this.api.get<ApiResponse<TransferDto[]>>(`/transfer/account/${accountId}`);
   }
 
   getTransfersByCustomer(customerId: number): Observable<ApiResponse<TransferDto[]>> {
-    return this.api.get<ApiResponse<TransferDto[]>>(`/Transfer/customer/${customerId}`);
+    return this.api.get<ApiResponse<TransferDto[]>>(`/transfer/customer/${customerId}`);
   }
 
   validateTransfer(transferDto: CreateTransferDto): Observable<ApiResponse<any>> {
-    return this.api.post<ApiResponse<any>>('/Transfer/validate', transferDto);
+    return this.api.post<ApiResponse<any>>('/transfer/validate', transferDto);
+  }
+
+  validateTransferByAccountNumber(dto: CreateTransferByAccountNumberDto): Observable<ApiResponse<any>> {
+    return this.api.post<ApiResponse<any>>('/transfer/validate/by-account-number', dto);
   }
 } 

@@ -54,6 +54,38 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        // New endpoint: create transfer by account numbers (cross-customer supported)
+        [HttpPost("by-account-number")]
+        public async Task<IActionResult> CreateTransferByAccountNumber([FromBody] CreateTransferByAccountNumberDto transferDto)
+        {
+            try
+            {
+                _logger.LogInformation("Creating transfer (by account number) from {FromAccount} to {ToAccount}",
+                    transferDto.FromAccountNumber, transferDto.ToAccountNumber);
+
+                var result = await _transferService.CreateTransferByAccountNumberAsync(
+                    transferDto.FromAccountNumber,
+                    transferDto.ToAccountNumber,
+                    transferDto.Amount,
+                    transferDto.Description);
+
+                if (result.Success)
+                {
+                    return Ok(result);
+                }
+                return BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating transfer by account number");
+                return StatusCode(500, new ApiResponse<TransferDto>
+                {
+                    Success = false,
+                    Message = "Transfer oluşturulurken bir hata oluştu"
+                });
+            }
+        }
+
         [HttpGet("account/{accountId}")]
         public async Task<IActionResult> GetTransfersByAccount(int accountId)
         {
@@ -141,6 +173,32 @@ namespace BankingApp.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error validating transfer");
+                return StatusCode(500, new ApiResponse<object>
+                {
+                    Success = false,
+                    Message = "Transfer doğrulaması sırasında bir hata oluştu"
+                });
+            }
+        }
+
+        // New endpoint: validate by account numbers
+        [HttpPost("validate/by-account-number")]
+        public async Task<IActionResult> ValidateTransferByAccountNumber([FromBody] CreateTransferByAccountNumberDto transferDto)
+        {
+            try
+            {
+                _logger.LogInformation("Validating transfer (by account number) from {FromAccount} to {ToAccount}",
+                    transferDto.FromAccountNumber, transferDto.ToAccountNumber);
+
+                var result = await _transferService.ValidateTransferByAccountNumberAsync(
+                    transferDto.FromAccountNumber,
+                    transferDto.ToAccountNumber,
+                    transferDto.Amount);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating transfer by account number");
                 return StatusCode(500, new ApiResponse<object>
                 {
                     Success = false,
