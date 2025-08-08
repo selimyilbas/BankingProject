@@ -15,12 +15,12 @@ import { ApiResponse } from '../../../models/api-response.model';
 })
 export class AccountCreateComponent {
   currencies = [
-    { code: 'TRY', name: 'Türk Lirası' },
+    { code: 'TL', name: 'Türk Lirası' },
     { code: 'USD', name: 'Amerikan Doları' },
     { code: 'EUR', name: 'Euro' }
   ];
 
-  selectedCurrency = 'TRY';
+  selectedCurrency = 'TL';
   loading = false;
   error = '';
   success = false;

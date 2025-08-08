@@ -57,34 +57,5 @@ export class LoginComponent {
     }
   }
 
-  testLogin() {
-    console.log('Test login clicked');
-    this.credentials.tckn = '12345678901';
-    this.credentials.password = '123456';
-    this.onLogin();
-  }
-
-  testApiConnection() {
-    console.log('Testing API connection...');
-    fetch('http://localhost:5115/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        tckn: '12345678901',
-        password: '123456'
-      })
-    })
-    .then(response => {
-      console.log('Response status:', response.status);
-      return response.json();
-    })
-    .then(data => {
-      console.log('Response data:', data);
-    })
-    .catch(error => {
-      console.error('Fetch error:', error);
-    });
-  }
+  // Test helper methods removed
 }

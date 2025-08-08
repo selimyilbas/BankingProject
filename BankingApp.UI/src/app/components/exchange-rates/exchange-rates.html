@@ -43,7 +43,7 @@
             <span class="currency">₺</span>
             <span *ngIf="rate.buyDelta !== undefined" class="delta" [class.up]="(rate.buyDelta||0) > 0" [class.down]="(rate.buyDelta||0) < 0">
               <i class="fas" [class.fa-arrow-up]="(rate.buyDelta||0) > 0" [class.fa-arrow-down]="(rate.buyDelta||0) < 0"></i>
-              {{ rate.buyDelta > 0 ? '+' : ''}}{{ rate.buyDelta | number:'1.4-4' }}
+            {{ rate.buyDelta > 0 ? '+' : ''}}{{ rate.buyDelta | number:'1.4-4' }}
               <span class="delta-pct">({{ rate.buyDeltaPct! > 0 ? '+' : ''}}{{ rate.buyDeltaPct }}%)</span>
             </span>
           </div>
@@ -59,7 +59,7 @@
             <span class="currency">₺</span>
             <span *ngIf="rate.sellDelta !== undefined" class="delta" [class.up]="(rate.sellDelta||0) > 0" [class.down]="(rate.sellDelta||0) < 0">
               <i class="fas" [class.fa-arrow-up]="(rate.sellDelta||0) > 0" [class.fa-arrow-down]="(rate.sellDelta||0) < 0"></i>
-              {{ rate.sellDelta > 0 ? '+' : ''}}{{ rate.sellDelta | number:'1.4-4' }}
+            {{ rate.sellDelta > 0 ? '+' : ''}}{{ rate.sellDelta | number:'1.4-4' }}
               <span class="delta-pct">({{ rate.sellDeltaPct! > 0 ? '+' : ''}}{{ rate.sellDeltaPct }}%)</span>
             </span>
           </div>

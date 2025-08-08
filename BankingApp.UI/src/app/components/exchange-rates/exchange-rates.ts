@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExchangeRateService, ExchangeRateDisplay } from '../../services/exchange-rate.service';
 
@@ -9,16 +9,18 @@ import { ExchangeRateService, ExchangeRateDisplay } from '../../services/exchang
   templateUrl: './exchange-rates.html',
   styleUrl: './exchange-rates.css'
 })
-export class ExchangeRatesComponent implements OnInit {
+export class ExchangeRatesComponent implements OnInit, OnDestroy {
   exchangeRates: (ExchangeRateDisplay & { buyDelta?: number; sellDelta?: number; buyDeltaPct?: number; sellDeltaPct?: number })[] = [];
   loading = true;
   lastUpdated: Date = new Date();
   private previousMap = new Map<string, { buy: number; sell: number }>();
+  private refreshIntervalId: any | null = null;
 
   constructor(private exchangeRateService: ExchangeRateService) {}
 
   ngOnInit() {
     this.loadExchangeRates();
+    this.refreshIntervalId = setInterval(() => this.loadExchangeRates(), 5000);
   }
 
   loadExchangeRates() {
@@ -67,5 +69,12 @@ export class ExchangeRatesComponent implements OnInit {
 
   refreshRates() {
     this.loadExchangeRates();
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshIntervalId) {
+      clearInterval(this.refreshIntervalId);
+      this.refreshIntervalId = null;
+    }
   }
 }

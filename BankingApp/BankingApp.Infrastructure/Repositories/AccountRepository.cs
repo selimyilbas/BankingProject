@@ -42,6 +42,19 @@ namespace BankingApp.Infrastructure.Repositories
 
         public async Task<string> GenerateAccountNumberAsync(string currency)
         {
+            // Ensure a sequence row exists for the requested currency to avoid NULL from the stored procedure
+            var sequenceExists = await _context.AccountNumberSequences
+                .AnyAsync(s => s.Currency == currency);
+            if (!sequenceExists)
+            {
+                _context.AccountNumberSequences.Add(new AccountNumberSequence
+                {
+                    Currency = currency,
+                    LastNumber = 0
+                });
+                await _context.SaveChangesAsync();
+            }
+
             var currencyParam = new SqlParameter("@currencyType", currency);
             var accountNumberParam = new SqlParameter("@newNumber", SqlDbType.VarChar, 12)
             {
@@ -53,7 +66,12 @@ namespace BankingApp.Infrastructure.Repositories
                 currencyParam,
                 accountNumberParam);
 
-            return accountNumberParam.Value?.ToString() ?? throw new InvalidOperationException("Failed to generate account number");
+            var accountNumber = accountNumberParam.Value?.ToString();
+            if (string.IsNullOrWhiteSpace(accountNumber))
+            {
+                throw new InvalidOperationException("Failed to generate account number");
+            }
+            return accountNumber;
         }
 
         public async Task<bool> UpdateBalanceAsync(int accountId, decimal newBalance)

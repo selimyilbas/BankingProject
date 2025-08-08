@@ -160,14 +160,10 @@ namespace BankingApp.Application.Services.Implementations
             {
                 _logger.LogInformation("Fetching current exchange rates directly from API (no cache) - TOP 25");
 
-                // Limit to most used currencies to reduce API load
-                // Top 7 commonly used + 3 additional
+                // Limit to selected currencies for performance
                 var desiredCurrencies = new[]
                 {
-                    // Top 7
-                    "USD","EUR","GBP","CHF","JPY","CAD","AUD",
-                    // +3 additional popular
-                    "CNY","AED","SAR"
+                    "USD","EUR","GBP","CNY","AED"
                 };
 
                 var currencyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -306,10 +302,10 @@ namespace BankingApp.Application.Services.Implementations
                         }
                     }
 
-                    // Cache for 60 seconds
+                    // Cache for 5 seconds
                     _cache.Set(cacheKey, ratesMap, new MemoryCacheEntryOptions
                     {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5)
                     });
                 }
 

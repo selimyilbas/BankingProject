@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AccountService } from '../../services/account';
@@ -12,7 +12,7 @@ import { ExchangeRateService, ExchangeRateDisplay } from '../../services/exchang
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   currentUser: any;
   accounts: any[] = [];
   totalBalance = {
@@ -26,6 +26,7 @@ export class DashboardComponent implements OnInit {
 
   exchangeRates: ExchangeRateDisplay[] = [];
   exchangeRatesLastUpdated: Date = new Date();
+  private refreshIntervalId: any | null = null;
 
   constructor(
     private authService: AuthService,
@@ -38,6 +39,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.loadAccounts();
     this.loadExchangeRates();
+    this.refreshIntervalId = setInterval(() => this.loadExchangeRates(), 5000);
   }
 
   loadAccounts() {
@@ -98,6 +100,13 @@ export class DashboardComponent implements OnInit {
 
   refreshExchangeRates() {
     this.loadExchangeRates();
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshIntervalId) {
+      clearInterval(this.refreshIntervalId);
+      this.refreshIntervalId = null;
+    }
   }
 
   getCurrencyIcon(currency: string): string {
