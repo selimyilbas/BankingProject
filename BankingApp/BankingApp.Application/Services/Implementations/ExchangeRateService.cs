@@ -155,79 +155,78 @@ namespace BankingApp.Application.Services.Implementations
         {
             try
             {
+                _logger.LogInformation("Fetching current exchange rates directly from API (no cache) - TOP 25");
+
+                var desiredCurrencies = new[]
+                {
+                    "USD","EUR","GBP","CHF","JPY","CAD","AUD","CNY","RUB","AED",
+                    "SAR","NOK","SEK","DKK","KWD","QAR","BHD","INR","SGD","HKD",
+                    "NZD","ZAR","PLN","RON","HUF"
+                };
+
+                var currencyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["USD"] = "Amerikan Doları",
+                    ["EUR"] = "Euro",
+                    ["GBP"] = "İngiliz Sterlini",
+                    ["CHF"] = "İsviçre Frangı",
+                    ["JPY"] = "Japon Yeni",
+                    ["CAD"] = "Kanada Doları",
+                    ["AUD"] = "Avustralya Doları",
+                    ["CNY"] = "Çin Yuanı",
+                    ["RUB"] = "Rus Rublesi",
+                    ["AED"] = "BAE Dirhemi",
+                    ["SAR"] = "Suudi Riyali",
+                    ["NOK"] = "Norveç Kronu",
+                    ["SEK"] = "İsveç Kronu",
+                    ["DKK"] = "Danimarka Kronu",
+                    ["KWD"] = "Kuveyt Dinarı",
+                    ["QAR"] = "Katar Riyali",
+                    ["BHD"] = "Bahreyn Dinarı",
+                    ["INR"] = "Hindistan Rupisi",
+                    ["SGD"] = "Singapur Doları",
+                    ["HKD"] = "Hong Kong Doları",
+                    ["NZD"] = "Yeni Zelanda Doları",
+                    ["ZAR"] = "Güney Afrika Randı",
+                    ["PLN"] = "Polonya Zlotisi",
+                    ["RON"] = "Rumen Leyi",
+                    ["HUF"] = "Macar Forinti"
+                };
+
                 var exchangeRates = new List<ExchangeRateDisplayDto>();
-                bool hasRealRates = false;
+                var spreadPercent = 0.005m; // 0.5% bank spread
 
-                _logger.LogInformation("Fetching current exchange rates directly from API (no cache)");
-
-                // Get USD/TRY rate using the new API system
-                try
+                foreach (var code in desiredCurrencies)
                 {
-                    var usdToTryRate = await GetRateFromApiAsync("USD", "TRY");
-                    if (usdToTryRate.HasValue)
+                    try
                     {
-                        hasRealRates = true;
-                        
-                        var spreadPercent = 0.005m; // 0.5% spread
-                        var buyRate = usdToTryRate.Value * (1 - spreadPercent);
-                        var sellRate = usdToTryRate.Value * (1 + spreadPercent);
-
-                        exchangeRates.Add(new ExchangeRateDisplayDto
+                        var rate = await GetRateFromApiAsync(code, "TRY");
+                        if (rate.HasValue)
                         {
-                            Currency = "USD",
-                            CurrencyName = "Amerikan Doları",
-                            BuyRate = Math.Round(buyRate, 4),
-                            SellRate = Math.Round(sellRate, 4)
-                        });
-                        
-                        _logger.LogInformation("✅ Real USD/TRY rate: {Rate}", usdToTryRate);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("❌ Could not get USD/TRY rate from any API");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "❌ Failed to get USD/TRY rate from API");
-                }
+                            var buy = Math.Round(rate.Value * (1 - spreadPercent), 4);
+                            var sell = Math.Round(rate.Value * (1 + spreadPercent), 4);
 
-                // Get EUR/TRY rate using the new API system
-                try
-                {
-                    var eurToTryRate = await GetRateFromApiAsync("EUR", "TRY");
-                    if (eurToTryRate.HasValue)
-                    {
-                        hasRealRates = true;
-                        
-                        var spreadPercent = 0.005m; // 0.5% spread
-                        var buyRate = eurToTryRate.Value * (1 - spreadPercent);
-                        var sellRate = eurToTryRate.Value * (1 + spreadPercent);
-
-                        exchangeRates.Add(new ExchangeRateDisplayDto
+                            exchangeRates.Add(new ExchangeRateDisplayDto
+                            {
+                                Currency = code,
+                                CurrencyName = currencyNames.TryGetValue(code, out var name) ? name : code,
+                                BuyRate = buy,
+                                SellRate = sell
+                            });
+                        }
+                        else
                         {
-                            Currency = "EUR",
-                            CurrencyName = "Euro",
-                            BuyRate = Math.Round(buyRate, 4),
-                            SellRate = Math.Round(sellRate, 4)
-                        });
-                        
-                        _logger.LogInformation("✅ Real EUR/TRY rate: {Rate}", eurToTryRate);
+                            _logger.LogWarning("Rate not found for {Code}/TRY", code);
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        _logger.LogWarning("❌ Could not get EUR/TRY rate from any API");
+                        _logger.LogError(ex, "Failed to get rate for {Code}/TRY", code);
                     }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "❌ Failed to get EUR/TRY rate from API");
                 }
 
-                // Return error if no rates were fetched
-                if (!hasRealRates || exchangeRates.Count == 0)
+                if (exchangeRates.Count == 0)
                 {
-                    _logger.LogError("❌ All exchange rate API calls failed - NO FALLBACK TO HARDCODED");
                     return ApiResponse<ExchangeRatesResponseDto>.ErrorResponse("Unable to fetch real-time exchange rates");
                 }
 
