@@ -22,6 +22,7 @@ namespace BankingApp.Application.Mappings
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
             
             CreateMap<CreateCustomerDto, Customer>();
+            CreateMap<UpdateCustomerDto, Customer>();
 
             // Account mappings
             CreateMap<Account, AccountDto>()

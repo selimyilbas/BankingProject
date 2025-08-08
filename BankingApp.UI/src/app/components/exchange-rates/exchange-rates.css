@@ -190,6 +190,20 @@
   color: var(--vakifbank-gray);
 }
 
+.rate-value .delta {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+.rate-value .delta.up { color: #1f8f2e; background: #e8f7ec; }
+.rate-value .delta.down { color: #c62828; background: #fdecea; }
+.rate-value .delta .delta-pct { opacity: 0.8; font-weight: 500; }
+
 .rate-value.buy .value {
   color: #28a745;
 }

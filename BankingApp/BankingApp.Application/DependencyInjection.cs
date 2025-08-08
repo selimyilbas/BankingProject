@@ -4,6 +4,7 @@ using Microsoft.Extensions.Http;
 using BankingApp.Application.Services.Interfaces;
 using BankingApp.Application.Services.Implementations;
 using BankingApp.Application.Mappings;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BankingApp.Application
 {
@@ -19,6 +20,7 @@ namespace BankingApp.Application
             
             // Add HttpClient for ExchangeRateService
             services.AddHttpClient<ExchangeRateService>();
+            services.AddMemoryCache();
             
             return services;
         }

@@ -73,6 +73,24 @@ namespace BankingApp.API.Controllers
             return Ok(result);
         }
 
+        [HttpPut("{customerId}")]
+        public async Task<ActionResult<ApiResponse<CustomerDto>>> UpdateCustomer(int customerId, [FromBody] UpdateCustomerDto dto)
+        {
+            var result = await _customerService.UpdateCustomerAsync(customerId, dto);
+            if (result.Success)
+                return Ok(result);
+            return BadRequest(result);
+        }
+
+        [HttpPost("{customerId}/change-password")]
+        public async Task<ActionResult<ApiResponse<bool>>> ChangePassword(int customerId, [FromBody] ChangePasswordDto dto)
+        {
+            var result = await _customerService.ChangePasswordAsync(customerId, dto.CurrentPassword, dto.NewPassword);
+            if (result.Success)
+                return Ok(result);
+            return BadRequest(result);
+        }
+
         [HttpPost("validate-tckn")]
         public async Task<ActionResult<ApiResponse<bool>>> ValidateTCKN([FromBody] ValidateTCKNDto dto)
         {

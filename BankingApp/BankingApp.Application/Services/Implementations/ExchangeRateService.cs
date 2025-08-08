@@ -10,6 +10,7 @@ using BankingApp.Application.Services.Interfaces;
 using BankingApp.Domain.Entities;
 using BankingApp.Domain.Interfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BankingApp.Application.Services.Implementations
 {
@@ -18,16 +19,18 @@ namespace BankingApp.Application.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ExchangeRateService> _logger;
         private readonly HttpClient _httpClient;
+        private readonly IMemoryCache _cache;
         // Primary endpoint - Uses frankfurter.app for real-time currency data
         private const string PRIMARY_API_BASE_URL = "https://api.frankfurter.app/latest";
         // Fallback API endpoint in case the primary API fails
         private const string FALLBACK_API_BASE_URL = "https://api.exchangerate-api.com/v4/latest";
 
-        public ExchangeRateService(IUnitOfWork unitOfWork, ILogger<ExchangeRateService> logger, HttpClient httpClient)
+        public ExchangeRateService(IUnitOfWork unitOfWork, ILogger<ExchangeRateService> logger, HttpClient httpClient, IMemoryCache cache)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _httpClient = httpClient;
+            _cache = cache;
         }
 
         public async Task<ApiResponse<decimal>> GetExchangeRateAsync(string fromCurrency, string toCurrency)
@@ -157,11 +160,14 @@ namespace BankingApp.Application.Services.Implementations
             {
                 _logger.LogInformation("Fetching current exchange rates directly from API (no cache) - TOP 25");
 
+                // Limit to most used currencies to reduce API load
+                // Top 7 commonly used + 3 additional
                 var desiredCurrencies = new[]
                 {
-                    "USD","EUR","GBP","CHF","JPY","CAD","AUD","CNY","RUB","AED",
-                    "SAR","NOK","SEK","DKK","KWD","QAR","BHD","INR","SGD","HKD",
-                    "NZD","ZAR","PLN","RON","HUF"
+                    // Top 7
+                    "USD","EUR","GBP","CHF","JPY","CAD","AUD",
+                    // +3 additional popular
+                    "CNY","AED","SAR"
                 };
 
                 var currencyNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -216,7 +222,7 @@ namespace BankingApp.Application.Services.Implementations
                         }
                         else
                         {
-                            _logger.LogWarning("Rate not found for {Code}/TRY", code);
+                            _logger.LogWarning("Rate not found for {Co lode}/TRY", code);
                         }
                     }
                     catch (Exception ex)
@@ -265,27 +271,46 @@ namespace BankingApp.Application.Services.Implementations
             {
                 // Use EUR as base for frankfurter.app, USD for exchangerate-api.com
                 var baseCurrency = baseUrl.Contains("frankfurter") ? "EUR" : "USD";
-                var url = $"{baseUrl}?base={baseCurrency}";
-                
-                _logger.LogInformation("Fetching exchange rate from {ApiName}: {Url}", apiName, url);
+                var cacheKey = $"rates::{apiName}::{baseCurrency}";
 
-                var response = await _httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
+                // Try cache first (short TTL)
+                if (!_cache.TryGetValue(cacheKey, out Dictionary<string, decimal>? ratesMap))
                 {
-                    _logger.LogWarning("{ApiName} request failed with status: {StatusCode}", apiName, response.StatusCode);
-                    return null;
-                }
+                    var url = $"{baseUrl}?base={baseCurrency}";
+                    _logger.LogInformation("Fetching exchange rates map from {ApiName}: {Url}", apiName, url);
 
-                var jsonString = await response.Content.ReadAsStringAsync();
-                _logger.LogInformation("{ApiName} Response JSON: {JsonString}", apiName, jsonString.Substring(0, Math.Min(200, jsonString.Length)));
-                
-                using var document = JsonDocument.Parse(jsonString);
-                var root = document.RootElement;
-                
-                if (!root.TryGetProperty("rates", out var ratesElement))
-                {
-                    _logger.LogWarning("No rates property found in {ApiName} response", apiName);
-                    return null;
+                    var response = await _httpClient.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        _logger.LogWarning("{ApiName} request failed with status: {StatusCode}", apiName, response.StatusCode);
+                        return null;
+                    }
+
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    _logger.LogInformation("{ApiName} Response JSON (truncated): {JsonString}", apiName, jsonString.Substring(0, Math.Min(200, jsonString.Length)));
+
+                    using var document = JsonDocument.Parse(jsonString);
+                    var root = document.RootElement;
+                    if (!root.TryGetProperty("rates", out var ratesElement))
+                    {
+                        _logger.LogWarning("No rates property found in {ApiName} response", apiName);
+                        return null;
+                    }
+
+                    ratesMap = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
+                    foreach (var prop in ratesElement.EnumerateObject())
+                    {
+                        if (prop.Value.ValueKind == JsonValueKind.Number && prop.Value.TryGetDecimal(out var val))
+                        {
+                            ratesMap[prop.Name] = val;
+                        }
+                    }
+
+                    // Cache for 60 seconds
+                    _cache.Set(cacheKey, ratesMap, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+                    });
                 }
 
                 decimal? crossRate = null;
@@ -294,36 +319,21 @@ namespace BankingApp.Application.Services.Implementations
                 if (fromCurrency == baseCurrency)
                 {
                     // Direct rate from base currency
-                    if (ratesElement.TryGetProperty(toCurrency, out var toRateElem))
-                    {
-                        crossRate = toRateElem.GetDecimal();
-                    }
+                    if (ratesMap != null && ratesMap.TryGetValue(toCurrency, out var toRate))
+                        crossRate = toRate;
                 }
                 else if (toCurrency == baseCurrency)
                 {
                     // Inverse rate to base currency
-                    if (ratesElement.TryGetProperty(fromCurrency, out var fromRateElem))
-                    {
-                        var fromRate = fromRateElem.GetDecimal();
-                        if (fromRate > 0)
-                        {
-                            crossRate = 1 / fromRate;
-                        }
-                    }
+                    if (ratesMap != null && ratesMap.TryGetValue(fromCurrency, out var fromRate) && fromRate > 0)
+                        crossRate = 1 / fromRate;
                 }
                 else
                 {
                     // Cross rate via base currency
-                    if (ratesElement.TryGetProperty(fromCurrency, out var fromRateElem) &&
-                        ratesElement.TryGetProperty(toCurrency, out var toRateElem))
-                    {
-                        var fromRate = fromRateElem.GetDecimal();
-                        var toRate = toRateElem.GetDecimal();
-                        if (fromRate > 0)
-                        {
-                            crossRate = toRate / fromRate;
-                        }
-                    }
+                    if (ratesMap != null && ratesMap.TryGetValue(fromCurrency, out var fromRate) &&
+                        ratesMap.TryGetValue(toCurrency, out var toRate) && fromRate > 0)
+                        crossRate = toRate / fromRate;
                 }
 
                 if (crossRate.HasValue)

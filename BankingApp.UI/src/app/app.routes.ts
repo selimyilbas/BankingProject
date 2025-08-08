@@ -11,6 +11,7 @@ import { AccountsComponent } from './components/accounts/accounts';
 import { ExchangeRatesComponent } from './components/exchange-rates/exchange-rates';
 import { CurrencyConverterComponent } from './components/exchange-rates/currency-converter/currency-converter';
 import { TransactionHistoryComponent } from './components/transaction/transaction-history/transaction-history';
+import { ProfileComponent } from './components/profile/profile';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -26,5 +27,6 @@ export const routes: Routes = [
   { path: 'transfers', component: TransferHistoryComponent },
   { path: 'exchange-rates', component: ExchangeRatesComponent },
   { path: 'converter', component: CurrencyConverterComponent },
+  { path: 'profile', component: ProfileComponent },
   { path: '**', redirectTo: '/login' }
 ];

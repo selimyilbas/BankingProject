@@ -1,7 +1,7 @@
 /* src/styles.css */
 :root {
-    --vakifbank-yellow: #F5C842;
-    --vakifbank-dark-yellow: #E6B935;
+    --vakifbank-yellow: #F3BC44; /* rgb(243, 188, 68) */
+    --vakifbank-dark-yellow: #E2AB34; /* darker shade for hover */
     --vakifbank-black: #1A1A1A;
     --vakifbank-gray: #666666;
     --vakifbank-light-gray: #F5F5F5;
@@ -144,7 +144,7 @@
   .vakifbank-form-control:focus {
     outline: none;
     border-color: var(--vakifbank-yellow);
-    box-shadow: 0 0 0 2px rgba(245, 200, 66, 0.2);
+    box-shadow: 0 0 0 2px rgba(243, 188, 68, 0.2);
   }
   
   /* Tables */

@@ -1,0 +1,71 @@
+<div class="profile-page">
+  <h2>Profil</h2>
+
+  <div class="alerts">
+    <div *ngIf="message" class="alert success">{{ message }}</div>
+    <div *ngIf="error" class="alert error">{{ error }}</div>
+  </div>
+
+  <div class="profile-sections" *ngIf="!loading">
+    <section class="card">
+      <h3>Bilgiler</h3>
+      <form (ngSubmit)="saveProfile()">
+        <div class="grid">
+          <label>
+            Ad
+            <input [(ngModel)]="profileForm.firstName" name="firstName" required />
+          </label>
+          <label>
+            Soyad
+            <input [(ngModel)]="profileForm.lastName" name="lastName" required />
+          </label>
+          <label>
+            E-posta
+            <input [(ngModel)]="profileForm.email" name="email" type="email" />
+          </label>
+          <label>
+            Telefon
+            <input [(ngModel)]="profileForm.phoneNumber" name="phoneNumber" />
+          </label>
+          <label>
+            Doğum Tarihi
+            <input [(ngModel)]="profileForm.dateOfBirth" name="dateOfBirth" type="date" required />
+          </label>
+        </div>
+        <button type="submit" class="btn primary">Kaydet</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>Şifre Değiştir</h3>
+      <form (ngSubmit)="changePassword()">
+        <div class="grid">
+          <label>
+            Mevcut Şifre
+            <input [(ngModel)]="passwordForm.currentPassword" name="currentPassword" type="password" required />
+          </label>
+          <label>
+            Yeni Şifre
+            <input [(ngModel)]="passwordForm.newPassword" name="newPassword" type="password" required />
+          </label>
+          <label>
+            Yeni Şifre (Tekrar)
+            <input [(ngModel)]="passwordForm.confirmNewPassword" name="confirmNewPassword" type="password" required />
+          </label>
+        </div>
+        <button type="submit" class="btn">Değiştir</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>Hızlı Bilgiler</h3>
+      <ul class="quick-info">
+        <li><strong>Müşteri No:</strong> {{ user?.customerNumber }}</li>
+        <li><strong>TCKN:</strong> {{ user?.tckn }}</li>
+        <li><strong>Ad Soyad:</strong> {{ user?.name }}</li>
+      </ul>
+    </section>
+  </div>
+</div>
+
+

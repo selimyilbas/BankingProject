@@ -1,0 +1,20 @@
+.profile-page { padding: 16px; }
+.profile-page h2 { margin-bottom: 16px; }
+.profile-sections { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+label { display: flex; flex-direction: column; font-size: 14px; color: #333; }
+input { margin-top: 6px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; }
+.btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; background: #eee; }
+.btn.primary { background: #F5C842; }
+.alerts { margin-bottom: 12px; }
+.alert { padding: 10px; border-radius: 6px; margin: 6px 0; }
+.alert.success { background: #e7f7e7; color: #0b7a0b; }
+.alert.error { background: #fdeaea; color: #b11; }
+.quick-info { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+
+@media (max-width: 768px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+

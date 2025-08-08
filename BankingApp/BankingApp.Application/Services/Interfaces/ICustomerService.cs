@@ -14,5 +14,7 @@ namespace BankingApp.Application.Services.Interfaces
         Task<ApiResponse<PagedResult<CustomerSummaryDto>>> GetAllCustomersAsync(int pageNumber, int pageSize);
         Task<ApiResponse<bool>> ValidateTCKNAsync(string tckn, string firstName, string lastName, int birthYear);
         Task<CustomerDto?> AuthenticateCustomer(string tckn, string password);
+        Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int customerId, UpdateCustomerDto dto);
+        Task<ApiResponse<bool>> ChangePasswordAsync(int customerId, string currentPassword, string newPassword);
     }
 }

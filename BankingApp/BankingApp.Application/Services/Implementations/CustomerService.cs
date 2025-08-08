@@ -207,5 +207,66 @@ namespace BankingApp.Application.Services.Implementations
                 return null;
             }
         }
+
+        public async Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int customerId, UpdateCustomerDto dto)
+        {
+            try
+            {
+                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+                if (customer == null)
+                {
+                    return ApiResponse<CustomerDto>.ErrorResponse("Customer not found");
+                }
+
+                customer.FirstName = dto.FirstName;
+                customer.LastName = dto.LastName;
+                customer.Email = dto.Email;
+                customer.PhoneNumber = dto.PhoneNumber;
+                customer.DateOfBirth = dto.DateOfBirth;
+                if (dto.IsActive.HasValue)
+                {
+                    customer.IsActive = dto.IsActive.Value;
+                }
+
+                _unitOfWork.Customers.Update(customer);
+                await _unitOfWork.SaveChangesAsync();
+
+                var result = _mapper.Map<CustomerDto>(customer);
+                return ApiResponse<CustomerDto>.SuccessResponse(result, "Customer updated successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating customer");
+                return ApiResponse<CustomerDto>.ErrorResponse("An error occurred while updating customer");
+            }
+        }
+
+        public async Task<ApiResponse<bool>> ChangePasswordAsync(int customerId, string currentPassword, string newPassword)
+        {
+            try
+            {
+                var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+                if (customer == null)
+                {
+                    return ApiResponse<bool>.ErrorResponse("Customer not found");
+                }
+
+                if (customer.Password != currentPassword)
+                {
+                    return ApiResponse<bool>.ErrorResponse("Current password is incorrect");
+                }
+
+                customer.Password = newPassword;
+                _unitOfWork.Customers.Update(customer);
+                await _unitOfWork.SaveChangesAsync();
+
+                return ApiResponse<bool>.SuccessResponse(true, "Password changed successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password");
+                return ApiResponse<bool>.ErrorResponse("An error occurred while changing password");
+            }
+        }
     }
 }
