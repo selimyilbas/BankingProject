@@ -8,8 +8,16 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BankingApp.Application
 {
+    /// <summary>
+    /// Application katmanı servis kayıtlarını (DI) gerçekleştiren yardımcı sınıf.
+    /// </summary>
     public static class DependencyInjection
     {
+        /// <summary>
+        /// Application katmanı bağımlılıklarını IOC konteynerine ekler.
+        /// </summary>
+        /// <param name="services">Hizmet koleksiyonu.</param>
+        /// <returns>Hizmet koleksiyonu.</returns>
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<ICustomerService, CustomerService>();

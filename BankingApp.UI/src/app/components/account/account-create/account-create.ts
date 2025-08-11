@@ -6,6 +6,9 @@ import { AccountService } from '../../../services/account';
 import { AuthService } from '../../../services/auth';
 import { ApiResponse } from '../../../models/api-response.model';
 
+/**
+ * Hesap Oluşturma Bileşeni: seçilen para biriminde kullanıcı için yeni hesap açar.
+ */
 @Component({
   selector: 'app-account-create',
   standalone: true,
@@ -31,6 +34,7 @@ export class AccountCreateComponent {
     public router: Router
   ) {}
 
+  /** Hesap oluşturma işlemini tetikler. */
   createAccount() {
     this.error = '';
     this.success = false;

@@ -36,6 +36,9 @@ export interface ApiResponse<T> {
   errors?: string[];
 }
 
+/**
+ * Kimlik doğrulama servisi (RxJS destekli): login/register ve oturum durumu yönetimi.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -47,27 +50,33 @@ export class AuthService {
     this.loadUserFromStorage();
   }
 
+  /** TCKN ve şifre ile giriş yapar. */
   login(request: LoginRequest): Observable<ApiResponse<User>> {
     return this.api.post<ApiResponse<User>>('/Auth/login', request);
   }
 
+  /** Yeni kullanıcı kaydı oluşturur. */
   register(request: RegisterRequest): Observable<ApiResponse<User>> {
     return this.api.post<ApiResponse<User>>('/Auth/register', request);
   }
 
+  /** Oturumu kapatır ve localStorage'ı temizler. */
   logout(): void {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
   }
 
+  /** Mevcut kullanıcı bilgisini döner. */
   getCurrentUser(): User | null {
     return this.currentUserSubject.value;
   }
 
+  /** Kullanıcı giriş yaptı mı? */
   isLoggedIn(): boolean {
     return this.currentUserSubject.value !== null;
   }
 
+  /** Uygulama açılışında localStorage'dan kullanıcıyı yükler. */
   private loadUserFromStorage(): void {
     const userStr = localStorage.getItem('currentUser');
     if (userStr) {

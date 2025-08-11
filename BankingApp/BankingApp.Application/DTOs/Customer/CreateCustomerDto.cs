@@ -2,6 +2,9 @@ using System;
 
 namespace BankingApp.Application.DTOs.Customer
 {
+    /// <summary>
+    /// Müşteri oluşturma isteği modeli.
+    /// </summary>
     public class CreateCustomerDto
     {
         public string FirstName { get; set; } = string.Empty;

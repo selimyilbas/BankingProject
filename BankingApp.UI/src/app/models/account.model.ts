@@ -1,4 +1,6 @@
-// src/app/models/account.model.ts
+/**
+ * Hesap ile ilgili frontend modelleri.
+ */
 export interface Account {
     accountId: number;
     accountNumber: string;

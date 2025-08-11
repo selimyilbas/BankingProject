@@ -4,6 +4,9 @@ using BankingApp.Application.DTOs.Common;
 
 namespace BankingApp.API.Controllers
 {
+    /// <summary>
+    /// Döviz kuru işlemleri uç noktaları.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class ExchangeRateController : ControllerBase
@@ -19,6 +22,10 @@ namespace BankingApp.API.Controllers
             _vakifbankApiService = vakifbankApiService;
         }
 
+        /// <summary>
+        /// Güncel döviz kurlarını getirir.
+        /// </summary>
+        /// <returns>Kur bilgilerini içeren ApiResponse.</returns>
         [HttpGet("current")]
         public async Task<ActionResult<ApiResponse<ExchangeRatesResponseDto>>> GetCurrentExchangeRates()
         {
@@ -39,7 +46,10 @@ namespace BankingApp.API.Controllers
             }
         }
 
-        // Diagnostic: Fetch today's USD/EUR TRY rates directly from VakifBank API
+        /// <summary>
+        /// Tanılama amaçlı: VakıfBank API'sinden bugünün USD/EUR TRY kurlarını doğrudan çeker.
+        /// </summary>
+        /// <returns>VakıfBank yanıt özetini içeren ApiResponse.</returns>
         [HttpGet("vakifbank/today")]
         public async Task<ActionResult<ApiResponse<object>>> GetVakifbankToday()
         {
@@ -70,6 +80,12 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// İki para birimi arasındaki kuru getirir.
+        /// </summary>
+        /// <param name="fromCurrency">Kaynak para birimi (örn. USD).</param>
+        /// <param name="toCurrency">Hedef para birimi (örn. TRY).</param>
+        /// <returns>Kur bilgisini içeren ApiResponse.</returns>
         [HttpGet("rate")]
         public async Task<ActionResult<ApiResponse<decimal>>> GetExchangeRate([FromQuery] string fromCurrency, [FromQuery] string toCurrency)
         {
@@ -96,6 +112,10 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Kur bilgilerini harici kaynaktan günceller.
+        /// </summary>
+        /// <returns>Başarı durumunu içeren ApiResponse.</returns>
         [HttpPost("update")]
         public async Task<ActionResult<ApiResponse<object>>> UpdateExchangeRates()
         {

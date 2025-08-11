@@ -1,3 +1,10 @@
+/// <summary>
+/// Program giriş noktası.
+/// - DI kayıtları (Controller, Swagger, AutoMapper, Application/Infrastructure)
+/// - Opsiyonel şifreleme servisi (AES-GCM)
+/// - CORS (Angular 4200 için izin)
+/// - HTTP middleware hattı (Swagger, HTTPS yönlendirme, CORS, Authorization, Controller haritalama)
+/// </summary>
 using BankingApp.Infrastructure;
 using BankingApp.Application;
 using BankingApp.Application.Services.Interfaces;
@@ -6,7 +13,9 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+/// <summary>
+/// Hizmet kayıtları (Dependency Injection)
+/// </summary>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -19,14 +28,20 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Add AutoMapper
+/// <summary>
+/// Nesne eşleme (AutoMapper)
+/// </summary>
 builder.Services.AddAutoMapper(typeof(BankingApp.Application.Mappings.MappingProfile).Assembly);
 
-// Add Infrastructure and Application services
+/// <summary>
+/// Katman bağımlılıkları (Infrastructure & Application)
+/// </summary>
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
 
-// Encryption service registration
+/// <summary>
+/// Şifreleme servisi kaydı (opsiyonel)
+/// </summary>
 var encryptionKey = builder.Configuration["Encryption:Key"]; 
 var encryptionVersion = builder.Configuration["Encryption:Version"] ?? "v1";
 if (!string.IsNullOrWhiteSpace(encryptionKey))
@@ -41,7 +56,9 @@ if (!string.IsNullOrWhiteSpace(encryptionKey))
     }
 }
 
-// Add CORS
+/// <summary>
+/// CORS yapılandırması (Angular 4200 için)
+/// </summary>
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", builder =>
@@ -55,7 +72,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+/// <summary>
+/// HTTP istek hattı (middleware)
+/// </summary>
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -1,4 +1,6 @@
-// src/app/models/api-response.model.ts
+/**
+ * API yanıt modelleri: standart ApiResponse ve sayfalı sonuç yapısı.
+ */
 export interface ApiResponse<T> {
     success: boolean;
     message: string;

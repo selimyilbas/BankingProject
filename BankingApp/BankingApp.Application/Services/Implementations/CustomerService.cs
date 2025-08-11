@@ -11,6 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace BankingApp.Application.Services.Implementations
 {
+    /// <summary>
+    /// Müşteri yönetimi iş kurallarını ve veri işlemlerini yürütür.
+    /// </summary>
     public class CustomerService : ICustomerService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -26,6 +29,9 @@ namespace BankingApp.Application.Services.Implementations
             _encryptionService = encryptionService;
         }
 
+        /// <summary>
+        /// Yeni müşteri oluşturur.
+        /// </summary>
         public async Task<ApiResponse<CustomerDto>> CreateCustomerAsync(CreateCustomerDto dto)
         {
             try
@@ -64,6 +70,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteriyi kimliğine göre getirir.
+        /// </summary>
         public async Task<ApiResponse<CustomerDto>> GetCustomerByIdAsync(int customerId)
         {
             try
@@ -84,6 +93,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteriyi müşteri numarasına göre getirir.
+        /// </summary>
         public async Task<ApiResponse<CustomerDto>> GetCustomerByNumberAsync(string customerNumber)
         {
             try
@@ -104,6 +116,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteriyi TCKN'ye göre getirir.
+        /// </summary>
         public async Task<ApiResponse<CustomerDto>> GetCustomerByTCKNAsync(string tckn)
         {
             try
@@ -124,6 +139,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteriyi hesapları ile birlikte getirir.
+        /// </summary>
         public async Task<ApiResponse<CustomerWithAccountsDto>> GetCustomerWithAccountsAsync(int customerId)
         {
             try
@@ -144,6 +162,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteri listesini sayfalar halinde getirir.
+        /// </summary>
         public async Task<ApiResponse<PagedResult<CustomerSummaryDto>>> GetAllCustomersAsync(int pageNumber, int pageSize)
         {
             try
@@ -175,6 +196,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// TCKN doğrulaması yapar (öğrenme/test amaçlı).
+        /// </summary>
         public async Task<ApiResponse<bool>> ValidateTCKNAsync(string tckn, string firstName, string lastName, int birthYear)
         {
             try
@@ -191,6 +215,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// TCKN ve şifre ile kimlik doğrulaması yapar.
+        /// </summary>
         public async Task<CustomerDto?> AuthenticateCustomer(string tckn, string password)
         {
             try
@@ -239,6 +266,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteri bilgilerini günceller.
+        /// </summary>
         public async Task<ApiResponse<CustomerDto>> UpdateCustomerAsync(int customerId, UpdateCustomerDto dto)
         {
             try
@@ -272,6 +302,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteri şifresini değiştirir.
+        /// </summary>
         public async Task<ApiResponse<bool>> ChangePasswordAsync(int customerId, string currentPassword, string newPassword)
         {
             try

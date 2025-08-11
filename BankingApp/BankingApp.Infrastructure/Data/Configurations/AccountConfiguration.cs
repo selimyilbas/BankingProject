@@ -4,8 +4,14 @@ using BankingApp.Domain.Entities;
 
 namespace BankingApp.Infrastructure.Data.Configurations
 {
+    /// <summary>
+    /// `Account` varlığı için EF Core tablo ve sütun yapılandırmaları.
+    /// </summary>
     public class AccountConfiguration : IEntityTypeConfiguration<Account>
     {
+        /// <summary>
+        /// Varlık-konfigürasyon eşlemesini uygular.
+        /// </summary>
         public void Configure(EntityTypeBuilder<Account> builder)
         {
             builder.ToTable("Accounts");

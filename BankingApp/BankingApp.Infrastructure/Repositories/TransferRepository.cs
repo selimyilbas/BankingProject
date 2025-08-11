@@ -9,12 +9,21 @@ using BankingApp.Infrastructure.Data;
 
 namespace BankingApp.Infrastructure.Repositories
 {
+    /// <summary>
+    /// Transferlere yönelik veri erişim işlemleri.
+    /// </summary>
     public class TransferRepository : GenericRepository<Transfer>, ITransferRepository
     {
+        /// <summary>
+        /// Repository örneğini başlatır.
+        /// </summary>
         public TransferRepository(BankingDbContext context) : base(context)
         {
         }
 
+        /// <summary>
+        /// Transferi ilişkili hesap ve işlem detaylarıyla birlikte getirir.
+        /// </summary>
         public async Task<Transfer?> GetTransferWithDetailsAsync(int transferId)
         {
             return await _dbSet
@@ -27,6 +36,9 @@ namespace BankingApp.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.TransferId == transferId);
         }
 
+        /// <summary>
+        /// Hesaba ait transferleri döner.
+        /// </summary>
         public async Task<IEnumerable<Transfer>> GetTransfersByAccountIdAsync(int accountId)
         {
             return await _dbSet
@@ -37,6 +49,9 @@ namespace BankingApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Hesabın taraf olduğu transferleri döner.
+        /// </summary>
         public async Task<IEnumerable<Transfer>> GetByAccountAsync(int accountId)
         {
             return await _dbSet
@@ -47,6 +62,9 @@ namespace BankingApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Müşteriye ait transferleri döner.
+        /// </summary>
         public async Task<IEnumerable<Transfer>> GetByCustomerAsync(int customerId)
         {
             return await _dbSet
@@ -57,6 +75,9 @@ namespace BankingApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Benzersiz transfer kodu üretir.
+        /// </summary>
         public async Task<string> GenerateTransferCodeAsync()
         {
             var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss");

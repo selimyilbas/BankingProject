@@ -9,11 +9,17 @@ using BankingApp.Infrastructure.Data;
 
 namespace BankingApp.Infrastructure.Repositories
 {
+    /// <summary>
+    /// EF Core tabanlı generic repository uyguması.
+    /// </summary>
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
         protected readonly BankingDbContext _context;
         protected readonly DbSet<T> _dbSet;
 
+        /// <summary>
+        /// Repository için DbContext ataması yapar.
+        /// </summary>
         public GenericRepository(BankingDbContext context)
         {
             _context = context;

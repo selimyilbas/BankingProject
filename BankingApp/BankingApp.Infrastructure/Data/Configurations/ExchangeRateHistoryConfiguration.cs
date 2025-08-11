@@ -4,8 +4,14 @@ using BankingApp.Domain.Entities;
 
 namespace BankingApp.Infrastructure.Data.Configurations
 {
+    /// <summary>
+    /// `ExchangeRateHistory` için tablo, indeks ve sütun ayarları.
+    /// </summary>
     public class ExchangeRateHistoryConfiguration : IEntityTypeConfiguration<ExchangeRateHistory>
     {
+        /// <summary>
+        /// Varlık-konfigürasyon eşlemesini uygular.
+        /// </summary>
         public void Configure(EntityTypeBuilder<ExchangeRateHistory> builder)
         {
             builder.ToTable("ExchangeRateHistory");

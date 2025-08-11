@@ -6,6 +6,9 @@ using BankingApp.Application.Services.Interfaces;
 
 namespace BankingApp.API.Controllers
 {
+    /// <summary>
+    /// Kimlik doğrulama uç noktaları: giriş ve kayıt işlemleri.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
@@ -21,6 +24,11 @@ namespace BankingApp.API.Controllers
             _encryptionService = encryptionService;
         }
 
+        /// <summary>
+        /// TCKN ve şifre ile giriş yapar.
+        /// </summary>
+        /// <param name="loginDto">Giriş bilgileri.</param>
+        /// <returns>Müşteri özet bilgileri ile birlikte ApiResponse.</returns>
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
@@ -133,6 +141,11 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Yeni müşteri kaydı oluşturur.
+        /// </summary>
+        /// <param name="registerDto">Kayıt bilgileri.</param>
+        /// <returns>Oluşturulan müşteri bilgileri ile ApiResponse.</returns>
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
@@ -222,20 +235,53 @@ namespace BankingApp.API.Controllers
         }
     }
 
+    /// <summary>
+    /// Giriş isteği modeli.
+    /// </summary>
     public class LoginDto
     {
+        /// <summary>
+        /// Türkiye Cumhuriyeti Kimlik Numarası.
+        /// </summary>
         public string TCKN { get; set; } = string.Empty;
+        /// <summary>
+        /// Şifre.
+        /// </summary>
         public string Password { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Kayıt isteği modeli.
+    /// </summary>
     public class RegisterDto
     {
+        /// <summary>
+        /// Ad.
+        /// </summary>
         public string FirstName { get; set; } = string.Empty;
+        /// <summary>
+        /// Soyad.
+        /// </summary>
         public string LastName { get; set; } = string.Empty;
+        /// <summary>
+        /// Türkiye Cumhuriyeti Kimlik Numarası.
+        /// </summary>
         public string TCKN { get; set; } = string.Empty;
+        /// <summary>
+        /// Şifre.
+        /// </summary>
         public string Password { get; set; } = string.Empty;
+        /// <summary>
+        /// Doğum tarihi.
+        /// </summary>
         public DateTime DateOfBirth { get; set; }
+        /// <summary>
+        /// E-posta adresi (opsiyonel).
+        /// </summary>
         public string? Email { get; set; }
+        /// <summary>
+        /// Telefon numarası (opsiyonel).
+        /// </summary>
         public string? PhoneNumber { get; set; }
     }
 } 

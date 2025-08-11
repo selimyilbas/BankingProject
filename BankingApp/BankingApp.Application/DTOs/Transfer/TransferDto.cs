@@ -2,6 +2,9 @@ using System;
 
 namespace BankingApp.Application.DTOs.Transfer
 {
+    /// <summary>
+    /// Transfer detaylarını temsil eden DTO.
+    /// </summary>
     public class TransferDto
     {
         public int TransferId { get; set; }

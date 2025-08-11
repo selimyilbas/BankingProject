@@ -1,4 +1,6 @@
-// src/app/models/transaction.model.ts
+/**
+ * İşlem (transaction) ile ilgili frontend modelleri.
+ */
 export interface Transaction {
     transactionId: number;
     transactionCode: string;

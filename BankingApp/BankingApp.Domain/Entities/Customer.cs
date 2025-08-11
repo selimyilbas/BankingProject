@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace BankingApp.Domain.Entities
 {
+    /// <summary>
+    /// Müşteri temel bilgilerini ve ilişik hesaplarını temsil eder.
+    /// </summary>
     public class Customer
     {
         public int CustomerId { get; set; }
@@ -20,7 +23,9 @@ namespace BankingApp.Domain.Entities
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
 
-        // Navigation properties
+        /// <summary>
+        /// İlişkili hesaplar.
+        /// </summary>
         public virtual ICollection<Account> Accounts { get; set; } = new List<Account>();
     }
 }

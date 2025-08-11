@@ -3,6 +3,9 @@ using System;
 
 namespace BankingApp.Domain.Entities
 {
+    /// <summary>
+    /// Döviz kuru geçmişi kaydı.
+    /// </summary>
     public class ExchangeRateHistory
     {
         public int RateId { get; set; } // Changed from Id to RateId

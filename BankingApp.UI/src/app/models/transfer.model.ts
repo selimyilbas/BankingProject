@@ -1,4 +1,6 @@
-// src/app/models/transfer.model.ts
+/**
+ * Transfer ile ilgili frontend modelleri.
+ */
 export interface Transfer {
     transferId: number;
     transferCode: string;

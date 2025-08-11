@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace BankingApp.Domain.Entities
 {
+    /// <summary>
+    /// Para transferi varlığı: kaynak/hedef hesaplar ve tutarlar.
+    /// </summary>
     public class Transfer
     {
         public int TransferId { get; set; }
@@ -20,10 +23,21 @@ namespace BankingApp.Domain.Entities
         public DateTime TransferDate { get; set; } // Renamed from CreatedDate
         public DateTime? CompletedDate { get; set; }
 
-        // Navigation properties
+        /// <summary>
+        /// Kaynak hesap.
+        /// </summary>
         public virtual Account FromAccount { get; set; } = null!;
+        /// <summary>
+        /// Hedef hesap.
+        /// </summary>
         public virtual Account ToAccount { get; set; } = null!;
-        public virtual Transaction? FromTransaction { get; set; } // Added these navigation properties
+        /// <summary>
+        /// Kaynak hesapta oluşan işlem kaydı.
+        /// </summary>
+        public virtual Transaction? FromTransaction { get; set; }
+        /// <summary>
+        /// Hedef hesapta oluşan işlem kaydı.
+        /// </summary>
         public virtual Transaction? ToTransaction { get; set; }
     }
 }

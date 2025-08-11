@@ -4,6 +4,9 @@ using BankingApp.Application.DTOs.Account;
 
 namespace BankingApp.Application.DTOs.Customer
 {
+    /// <summary>
+    /// Müşteri detaylarını temsil eden DTO.
+    /// </summary>
     public class CustomerDto
     {
         public int CustomerId { get; set; }

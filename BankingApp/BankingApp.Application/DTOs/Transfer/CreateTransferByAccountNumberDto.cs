@@ -1,5 +1,8 @@
 namespace BankingApp.Application.DTOs.Transfer
 {
+    /// <summary>
+    /// Hesap numaraları ile transfer oluşturma isteği modeli.
+    /// </summary>
     public class CreateTransferByAccountNumberDto
     {
         public string FromAccountNumber { get; set; } = string.Empty;

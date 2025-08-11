@@ -2,6 +2,9 @@ using System;
 
 namespace BankingApp.Application.DTOs.Customer
 {
+    /// <summary>
+    /// Müşteri güncelleme isteği modeli.
+    /// </summary>
     public class UpdateCustomerDto
     {
         public string FirstName { get; set; } = string.Empty;

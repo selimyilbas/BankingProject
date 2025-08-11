@@ -2,6 +2,9 @@ using System;
 
 namespace BankingApp.Application.DTOs.Account
 {
+    /// <summary>
+    /// Hesap detaylarını temsil eden DTO.
+    /// </summary>
     public class AccountDto
     {
         public int AccountId { get; set; }

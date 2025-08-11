@@ -11,12 +11,21 @@ using System;
 
 namespace BankingApp.Infrastructure.Repositories
 {
+    /// <summary>
+    /// Hesaplara yönelik veri erişim işlemleri.
+    /// </summary>
     public class AccountRepository : GenericRepository<Account>, IAccountRepository
     {
+        /// <summary>
+        /// Repository örneğini başlatır.
+        /// </summary>
         public AccountRepository(BankingDbContext context) : base(context)
         {
         }
 
+        /// <summary>
+        /// Hesap numarasına göre hesap getirir.
+        /// </summary>
         public async Task<Account?> GetByAccountNumberAsync(string accountNumber)
         {
             return await _dbSet
@@ -24,6 +33,9 @@ namespace BankingApp.Infrastructure.Repositories
                 .FirstOrDefaultAsync(a => a.AccountNumber == accountNumber);
         }
 
+        /// <summary>
+        /// Müşterinin tüm hesaplarını getirir.
+        /// </summary>
         public async Task<IEnumerable<Account>> GetAccountsByCustomerIdAsync(int customerId)
         {
             return await _dbSet
@@ -32,6 +44,9 @@ namespace BankingApp.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Hesabı işlemleriyle birlikte getirir.
+        /// </summary>
         public async Task<Account?> GetAccountWithTransactionsAsync(int accountId)
         {
             return await _dbSet
@@ -40,6 +55,9 @@ namespace BankingApp.Infrastructure.Repositories
                 .FirstOrDefaultAsync(a => a.AccountId == accountId);
         }
 
+        /// <summary>
+        /// Para birimine göre yeni hesap numarası üretir (SP çağrısı).
+        /// </summary>
         public async Task<string> GenerateAccountNumberAsync(string currency)
         {
             // Ensure a sequence row exists for the requested currency to avoid NULL from the stored procedure
@@ -74,6 +92,9 @@ namespace BankingApp.Infrastructure.Repositories
             return accountNumber;
         }
 
+        /// <summary>
+        /// Hesap bakiyesini günceller.
+        /// </summary>
         public async Task<bool> UpdateBalanceAsync(int accountId, decimal newBalance)
         {
             var account = await GetByIdAsync(accountId);

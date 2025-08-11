@@ -1,5 +1,8 @@
 namespace BankingApp.Application.DTOs.Account
 {
+    /// <summary>
+    /// Hesap bakiye görüntüleme modeli.
+    /// </summary>
     public class AccountBalanceDto
     {
         public string AccountNumber { get; set; } = string.Empty;

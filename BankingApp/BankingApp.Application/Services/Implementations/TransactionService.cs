@@ -12,6 +12,9 @@ using Microsoft.Extensions.Logging;
 
 namespace BankingApp.Application.Services.Implementations
 {
+    /// <summary>
+    /// İşlem (transaction) yönetimi iş kurallarını uygular.
+    /// </summary>
     public class TransactionService : ITransactionService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -25,6 +28,9 @@ namespace BankingApp.Application.Services.Implementations
             _logger = logger;
         }
 
+        /// <summary>
+        /// Para yatırma işlemini yürütür.
+        /// </summary>
         public async Task<ApiResponse<TransactionDto>> DepositAsync(DepositDto dto)
         {
             try
@@ -97,6 +103,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesaba ait tüm işlemleri döner.
+        /// </summary>
         public async Task<ApiResponse<List<TransactionDto>>> GetTransactionsByAccountIdAsync(int accountId)
         {
             try
@@ -112,6 +121,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Tarih aralığına göre işlemleri döner.
+        /// </summary>
         public async Task<ApiResponse<List<TransactionDto>>> GetTransactionsByDateRangeAsync(int accountId, DateTime startDate, DateTime endDate)
         {
             try
@@ -132,6 +144,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// İşlemleri sayfalı olarak döner.
+        /// </summary>
         public async Task<ApiResponse<PagedResult<TransactionDto>>> GetTransactionsPagedAsync(int accountId, int pageNumber, int pageSize)
         {
             try

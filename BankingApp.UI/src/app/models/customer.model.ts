@@ -1,4 +1,6 @@
-// src/app/models/customer.model.ts
+/**
+ * Müşteri ile ilgili frontend modelleri.
+ */
 import { Account } from './account.model';
 
 export interface Customer {

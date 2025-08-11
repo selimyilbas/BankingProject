@@ -3,6 +3,9 @@ using System;
 
 namespace BankingApp.Domain.Entities
 {
+    /// <summary>
+    /// Hesap hareketi (transaction) varlığı.
+    /// </summary>
     public class Transaction
     {
         public int TransactionId { get; set; }
@@ -16,7 +19,9 @@ namespace BankingApp.Domain.Entities
         public DateTime TransactionDate { get; set; }
         public DateTime CreatedDate { get; set; }
 
-        // Navigation properties
+        /// <summary>
+        /// İşlemin ait olduğu hesap.
+        /// </summary>
         public virtual Account Account { get; set; } = null!;
     }
 }

@@ -41,36 +41,46 @@ export interface ApiResponse<T> {
   errors?: string[];
 }
 
+/**
+ * Transfer servisi: transfer oluşturma, doğrulama ve geçmiş sorgulama işlemleri.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class TransferService {
   constructor(private api: ApiService) {}
 
+  /** Hesap kimlikleri ile transfer oluşturur. */
   createTransfer(transferDto: CreateTransferDto): Observable<ApiResponse<TransferDto>> {
     return this.api.post<ApiResponse<TransferDto>>('/transfer', transferDto);
   }
 
+  /** Hesap numaraları ile transfer oluşturur. */
   createTransferByAccountNumber(dto: CreateTransferByAccountNumberDto): Observable<ApiResponse<TransferDto>> {
     return this.api.post<ApiResponse<TransferDto>>('/transfer/by-account-number', dto);
   }
 
+  /** Transfer kimliğine göre transfer getirir. */
   getTransferById(transferId: number): Observable<ApiResponse<TransferDto>> {
     return this.api.get<ApiResponse<TransferDto>>(`/Transfer/${transferId}`);
   }
 
+  /** Hesaba ait transferleri listeler. */
   getTransfersByAccount(accountId: number): Observable<ApiResponse<TransferDto[]>> {
     return this.api.get<ApiResponse<TransferDto[]>>(`/transfer/account/${accountId}`);
   }
 
+  /** Müşteriye ait transferleri listeler. */
   getTransfersByCustomer(customerId: number): Observable<ApiResponse<TransferDto[]>> {
     return this.api.get<ApiResponse<TransferDto[]>>(`/transfer/customer/${customerId}`);
   }
 
+  /** Transfer kurallarını önceden doğrular. */
   validateTransfer(transferDto: CreateTransferDto): Observable<ApiResponse<any>> {
     return this.api.post<ApiResponse<any>>('/transfer/validate', transferDto);
   }
 
+  /** Hesap numaraları ile transfer doğrulaması yapar. */
   validateTransferByAccountNumber(dto: CreateTransferByAccountNumberDto): Observable<ApiResponse<any>> {
     return this.api.post<ApiResponse<any>>('/transfer/validate/by-account-number', dto);
   }

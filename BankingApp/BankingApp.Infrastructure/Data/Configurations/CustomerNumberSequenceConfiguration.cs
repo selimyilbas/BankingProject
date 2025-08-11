@@ -4,8 +4,14 @@ using BankingApp.Domain.Entities;
 
 namespace BankingApp.Infrastructure.Data.Configurations
 {
+    /// <summary>
+    /// `CustomerNumberSequence` varlığı için tablo ve veri tohumlama ayarları.
+    /// </summary>
     public class CustomerNumberSequenceConfiguration : IEntityTypeConfiguration<CustomerNumberSequence>
     {
+        /// <summary>
+        /// Varlık-konfigürasyon eşlemesini uygular.
+        /// </summary>
         public void Configure(EntityTypeBuilder<CustomerNumberSequence> builder)
         {
             builder.ToTable("CustomerNumberSequence");

@@ -6,6 +6,9 @@ using BankingApp.Infrastructure.Data;
 
 namespace BankingApp.Infrastructure.Repositories
 {
+    /// <summary>
+    /// Repository'ler ve veritabanı işlemlerini koordine eden birim.
+    /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
         private readonly BankingDbContext _context;
@@ -17,6 +20,9 @@ namespace BankingApp.Infrastructure.Repositories
         private ITransferRepository? _transferRepository;
         private IExchangeRateRepository? _exchangeRateRepository;
 
+        /// <summary>
+        /// Unit of Work örneğini başlatır.
+        /// </summary>
         public UnitOfWork(BankingDbContext context)
         {
             _context = context;
@@ -37,16 +43,25 @@ namespace BankingApp.Infrastructure.Repositories
         public IExchangeRateRepository ExchangeRates => 
             _exchangeRateRepository ??= new ExchangeRateRepository(_context);
 
+        /// <summary>
+        /// Tüm değişiklikleri veritabanına yazar.
+        /// </summary>
         public async Task<int> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Yeni bir veritabanı işlemi (transaction) başlatır.
+        /// </summary>
         public async Task BeginTransactionAsync()
         {
             _transaction = await _context.Database.BeginTransactionAsync();
         }
 
+        /// <summary>
+        /// Açık işlemi onaylar (commit).
+        /// </summary>
         public async Task CommitTransactionAsync()
         {
             if (_transaction != null)
@@ -57,6 +72,9 @@ namespace BankingApp.Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Açık işlemi geri alır (rollback).
+        /// </summary>
         public async Task RollbackTransactionAsync()
         {
             if (_transaction != null)
@@ -67,6 +85,9 @@ namespace BankingApp.Infrastructure.Repositories
             }
         }
 
+        /// <summary>
+        /// Kaynakları serbest bırakır.
+        /// </summary>
         public void Dispose()
         {
             _transaction?.Dispose();

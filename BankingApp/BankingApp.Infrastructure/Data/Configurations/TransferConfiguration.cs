@@ -4,8 +4,14 @@ using BankingApp.Domain.Entities;
 
 namespace BankingApp.Infrastructure.Data.Configurations
 {
+    /// <summary>
+    /// `Transfer` varlığı için tablo, indeks ve ilişki ayarları.
+    /// </summary>
     public class TransferConfiguration : IEntityTypeConfiguration<Transfer>
     {
+        /// <summary>
+        /// Varlık-konfigürasyon eşlemesini uygular.
+        /// </summary>
         public void Configure(EntityTypeBuilder<Transfer> builder)
         {
             builder.ToTable("Transfers");

@@ -11,6 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace BankingApp.Application.Services.Implementations
 {
+    /// <summary>
+    /// Para transferi iş kurallarını uygular ve bakiyeleri günceller.
+    /// </summary>
     public class TransferService : ITransferService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -26,6 +29,9 @@ namespace BankingApp.Application.Services.Implementations
             _exchangeRateService = exchangeRateService;
         }
 
+        /// <summary>
+        /// Hesap kimlikleri ile transfer oluşturur.
+        /// </summary>
         public async Task<ApiResponse<TransferDto>> CreateTransferAsync(CreateTransferDto dto)
         {
             try
@@ -119,6 +125,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesap numaraları ile transfer oluşturur.
+        /// </summary>
         public async Task<ApiResponse<TransferDto>> CreateTransferByAccountNumberAsync(string fromAccountNumber, string toAccountNumber, decimal amount, string? description)
         {
             try
@@ -201,6 +210,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Transfer kimliğine göre transfer bilgisi getirir.
+        /// </summary>
         public async Task<ApiResponse<TransferDto>> GetTransferByIdAsync(int transferId)
         {
             try
@@ -221,6 +233,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesaba ait transferleri döner.
+        /// </summary>
         public async Task<ApiResponse<List<TransferDto>>> GetTransfersByAccountAsync(int accountId)
         {
             try
@@ -236,6 +251,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteriye ait transferleri döner.
+        /// </summary>
         public async Task<ApiResponse<List<TransferDto>>> GetTransfersByCustomerAsync(int customerId)
         {
             try
@@ -251,6 +269,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Transfer için temel iş kurallarını doğrular.
+        /// </summary>
         public async Task<ApiResponse<object>> ValidateTransferAsync(CreateTransferDto dto)
         {
             try
@@ -310,6 +331,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesap numaralarına göre transfer doğrulaması yapar.
+        /// </summary>
         public async Task<ApiResponse<object>> ValidateTransferByAccountNumberAsync(string fromAccountNumber, string toAccountNumber, decimal amount)
         {
             try

@@ -4,8 +4,14 @@ using BankingApp.Domain.Entities;
 
 namespace BankingApp.Infrastructure.Data.Configurations
 {
+    /// <summary>
+    /// `Transaction` varlığı için EF Core tablo ve sütun ayarları.
+    /// </summary>
     public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
     {
+        /// <summary>
+        /// Varlık-konfigürasyon eşlemesini uygular.
+        /// </summary>
         public void Configure(EntityTypeBuilder<Transaction> builder)
         {
             builder.ToTable("Transactions");

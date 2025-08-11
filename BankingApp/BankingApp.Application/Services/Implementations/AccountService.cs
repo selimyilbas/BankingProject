@@ -12,6 +12,9 @@ using Microsoft.Extensions.Logging;
 
 namespace BankingApp.Application.Services.Implementations
 {
+    /// <summary>
+    /// Hesap yönetimi iş kuralları ve veri erişim işlemlerini yürütür.
+    /// </summary>
     public class AccountService : IAccountService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -25,6 +28,9 @@ namespace BankingApp.Application.Services.Implementations
             _logger = logger;
         }
 
+        /// <summary>
+        /// Yeni bir hesap oluşturur ve numara atamasını gerçekleştirir.
+        /// </summary>
         public async Task<ApiResponse<AccountDto>> CreateAccountAsync(CreateAccountDto dto)
         {
             try
@@ -73,6 +79,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesabı kimliğine göre döner.
+        /// </summary>
         public async Task<ApiResponse<AccountDto>> GetAccountByIdAsync(int accountId)
         {
             try
@@ -91,6 +100,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesabı numarasına göre döner.
+        /// </summary>
         public async Task<ApiResponse<AccountDto>> GetAccountByNumberAsync(string accountNumber)
         {
             try
@@ -109,6 +121,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Müşteriye ait hesapları listeler.
+        /// </summary>
         public async Task<ApiResponse<List<AccountDto>>> GetAccountsByCustomerIdAsync(int customerId)
         {
             try
@@ -124,6 +139,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesap bakiyesini döner.
+        /// </summary>
         public async Task<ApiResponse<AccountBalanceDto>> GetAccountBalanceAsync(string accountNumber)
         {
             try
@@ -142,6 +160,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Hesabın aktiflik durumunu günceller.
+        /// </summary>
         public async Task<ApiResponse<bool>> UpdateAccountStatusAsync(int accountId, bool isActive)
         {
             try

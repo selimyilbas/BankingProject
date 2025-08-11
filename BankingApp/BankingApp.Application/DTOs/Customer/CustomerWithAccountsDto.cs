@@ -4,6 +4,9 @@ using BankingApp.Application.DTOs.Account;
 
 namespace BankingApp.Application.DTOs.Customer
 {
+    /// <summary>
+    /// Müşteri ve hesaplarını birlikte taşıyan DTO.
+    /// </summary>
     public class CustomerWithAccountsDto
     {
         public int CustomerId { get; set; }

@@ -5,6 +5,9 @@ using BankingApp.Application.DTOs.Common;
 
 namespace BankingApp.API.Controllers
 {
+    /// <summary>
+    /// Müşteri yönetimi uç noktaları: kayıt, sorgulama, güncelleme ve şifre işlemleri.
+    /// </summary>
     [ApiController]
 
 
@@ -19,6 +22,11 @@ namespace BankingApp.API.Controllers
             _customerService = customerService;
         }
 
+        /// <summary>
+        /// Yeni müşteri oluşturur.
+        /// </summary>
+        /// <param name="dto">Müşteri oluşturma isteği.</param>
+        /// <returns>Oluşturulan müşteriyi içeren ApiResponse.</returns>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> CreateCustomer([FromBody] CreateCustomerDto dto)
         {
@@ -28,6 +36,11 @@ namespace BankingApp.API.Controllers
             return BadRequest(result);
         }
 
+        /// <summary>
+        /// Müşteri kimliğine göre müşteri bilgilerini getirir.
+        /// </summary>
+        /// <param name="customerId">İç sistem müşteri kimliği.</param>
+        /// <returns>Müşteri bilgilerini içeren ApiResponse.</returns>
         [HttpGet("{customerId}")]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> GetCustomerById(int customerId)
         {
@@ -37,6 +50,11 @@ namespace BankingApp.API.Controllers
             return NotFound(result);
         }
 
+        /// <summary>
+        /// Müşteri numarasına göre müşteri bilgilerini getirir.
+        /// </summary>
+        /// <param name="customerNumber">Müşteri numarası.</param>
+        /// <returns>Müşteri bilgilerini içeren ApiResponse.</returns>
         [HttpGet("by-number/{customerNumber}")]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> GetCustomerByNumber(string customerNumber)
         {
@@ -46,6 +64,11 @@ namespace BankingApp.API.Controllers
             return NotFound(result);
         }
 
+        /// <summary>
+        /// TCKN'ye göre müşteri bilgilerini getirir.
+        /// </summary>
+        /// <param name="tckn">Türkiye Cumhuriyeti Kimlik Numarası.</param>
+        /// <returns>Müşteri bilgilerini içeren ApiResponse.</returns>
         [HttpGet("by-tckn/{tckn}")]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> GetCustomerByTCKN(string tckn)
         {
@@ -55,6 +78,11 @@ namespace BankingApp.API.Controllers
             return NotFound(result);
         }
 
+        /// <summary>
+        /// Müşteriyi hesaplarıyla birlikte getirir.
+        /// </summary>
+        /// <param name="customerId">İç sistem müşteri kimliği.</param>
+        /// <returns>Müşteri ve hesap özetini içeren ApiResponse.</returns>
         [HttpGet("{customerId}/with-accounts")]
         public async Task<ActionResult<ApiResponse<CustomerWithAccountsDto>>> GetCustomerWithAccounts(int customerId)
         {
@@ -64,6 +92,12 @@ namespace BankingApp.API.Controllers
             return NotFound(result);
         }
 
+        /// <summary>
+        /// Müşteri listesini sayfalı olarak getirir.
+        /// </summary>
+        /// <param name="pageNumber">Sayfa numarası.</param>
+        /// <param name="pageSize">Sayfa başına kayıt sayısı.</param>
+        /// <returns>Sayfalı müşteri sonuçlarını içeren ApiResponse.</returns>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PagedResult<CustomerSummaryDto>>>> GetAllCustomers(
             [FromQuery] int pageNumber = 1, 
@@ -73,6 +107,12 @@ namespace BankingApp.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Müşteri bilgilerini günceller.
+        /// </summary>
+        /// <param name="customerId">İç sistem müşteri kimliği.</param>
+        /// <param name="dto">Güncellenecek müşteri bilgileri.</param>
+        /// <returns>Güncellenmiş müşteriyi içeren ApiResponse.</returns>
         [HttpPut("{customerId}")]
         public async Task<ActionResult<ApiResponse<CustomerDto>>> UpdateCustomer(int customerId, [FromBody] UpdateCustomerDto dto)
         {
@@ -82,6 +122,12 @@ namespace BankingApp.API.Controllers
             return BadRequest(result);
         }
 
+        /// <summary>
+        /// Müşteri şifresini değiştirir.
+        /// </summary>
+        /// <param name="customerId">İç sistem müşteri kimliği.</param>
+        /// <param name="dto">Mevcut ve yeni şifre bilgisi.</param>
+        /// <returns>İşlem sonucunu içeren ApiResponse.</returns>
         [HttpPost("{customerId}/change-password")]
         public async Task<ActionResult<ApiResponse<bool>>> ChangePassword(int customerId, [FromBody] ChangePasswordDto dto)
         {
@@ -91,6 +137,11 @@ namespace BankingApp.API.Controllers
             return BadRequest(result);
         }
 
+        /// <summary>
+        /// TCKN doğrulaması yapar (öğrenme/test amaçlı).
+        /// </summary>
+        /// <param name="dto">Kimlik bilgileri.</param>
+        /// <returns>Doğrulama sonucunu içeren ApiResponse.</returns>
         [HttpPost("validate-tckn")]
         public async Task<ActionResult<ApiResponse<bool>>> ValidateTCKN([FromBody] ValidateTCKNDto dto)
         {
@@ -99,11 +150,26 @@ namespace BankingApp.API.Controllers
         }
     }
 
+    /// <summary>
+    /// TCKN doğrulama isteği modeli.
+    /// </summary>
     public class ValidateTCKNDto
     {
+        /// <summary>
+        /// Türkiye Cumhuriyeti Kimlik Numarası.
+        /// </summary>
         public string TCKN { get; set; } = string.Empty;
+        /// <summary>
+        /// Ad.
+        /// </summary>
         public string FirstName { get; set; } = string.Empty;
+        /// <summary>
+        /// Soyad.
+        /// </summary>
         public string LastName { get; set; } = string.Empty;
+        /// <summary>
+        /// Doğum yılı.
+        /// </summary>
         public int BirthYear { get; set; }
     }
 }

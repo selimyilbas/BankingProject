@@ -5,11 +5,17 @@ using BankingApp.Application.Services.Interfaces;
 
 namespace BankingApp.Application.Services.Implementations
 {
+    /// <summary>
+    /// AES-GCM tabanlı simetrik şifreleme servisinin uygulaması.
+    /// </summary>
     public class AesEncryptionService : IEncryptionService
     {
         private readonly byte[] _keyBytes;
         public string Version { get; }
 
+        /// <summary>
+        /// Base64 anahtar ve sürüm bilgisi ile servisi başlatır.
+        /// </summary>
         public AesEncryptionService(string base64Key, string version)
         {
             if (string.IsNullOrWhiteSpace(base64Key))
@@ -24,12 +30,18 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Değerin bu sürümle şifrelenmiş olup olmadığını kontrol eder.
+        /// </summary>
         public bool IsEncrypted(string value)
         {
             if (string.IsNullOrEmpty(value)) return false;
             return value.StartsWith(Version + ":", StringComparison.Ordinal);
         }
 
+        /// <summary>
+        /// Metni AES-GCM algoritması ile şifreler.
+        /// </summary>
         public string Encrypt(string plainText)
         {
             if (plainText == null) plainText = string.Empty;
@@ -54,6 +66,9 @@ namespace BankingApp.Application.Services.Implementations
             return $"{Version}:{b64}";
         }
 
+        /// <summary>
+        /// Şifreli metni çözer; başarısızsa orijinal değeri döner.
+        /// </summary>
         public string Decrypt(string cipherText)
         {
             if (string.IsNullOrEmpty(cipherText)) return string.Empty;

@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace BankingApp.API.Controllers
 {
+    /// <summary>
+    /// Para transferi (havale/EFT) uç noktaları.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class TransferController : ControllerBase
@@ -25,6 +28,11 @@ namespace BankingApp.API.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Hesap kimlikleri ile transfer oluşturur.
+        /// </summary>
+        /// <param name="transferDto">Transfer isteği.</param>
+        /// <returns>Oluşturulan transfer sonucu.</returns>
         [HttpPost]
         public async Task<IActionResult> CreateTransfer([FromBody] CreateTransferDto transferDto)
         {
@@ -54,7 +62,11 @@ namespace BankingApp.API.Controllers
             }
         }
 
-        // New endpoint: create transfer by account numbers (cross-customer supported)
+        /// <summary>
+        /// Hesap numaraları ile transfer oluşturur (müşteriler arası desteklenir).
+        /// </summary>
+        /// <param name="transferDto">Transfer isteği.</param>
+        /// <returns>Transfer sonucu.</returns>
         [HttpPost("by-account-number")]
         public async Task<IActionResult> CreateTransferByAccountNumber([FromBody] CreateTransferByAccountNumberDto transferDto)
         {
@@ -86,6 +98,11 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Bir hesaba ait transfer geçmişini getirir.
+        /// </summary>
+        /// <param name="accountId">Hesap kimliği.</param>
+        /// <returns>Transfer listesini içeren ApiResponse.</returns>
         [HttpGet("account/{accountId}")]
         public async Task<IActionResult> GetTransfersByAccount(int accountId)
         {
@@ -107,6 +124,11 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Bir müşteriye ait tüm transferleri getirir.
+        /// </summary>
+        /// <param name="customerId">Müşteri kimliği.</param>
+        /// <returns>Transfer listesini içeren ApiResponse.</returns>
         [HttpGet("customer/{customerId}")]
         public async Task<IActionResult> GetTransfersByCustomer(int customerId)
         {
@@ -128,6 +150,11 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Transfer kimliğine göre transfer detayını getirir.
+        /// </summary>
+        /// <param name="transferId">Transfer kimliği.</param>
+        /// <returns>Transfer detayını içeren ApiResponse.</returns>
         [HttpGet("{transferId}")]
         public async Task<IActionResult> GetTransferById(int transferId)
         {
@@ -159,6 +186,11 @@ namespace BankingApp.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Transfer kurallarını kontrol etmek için ön doğrulama yapar.
+        /// </summary>
+        /// <param name="transferDto">Transfer isteği.</param>
+        /// <returns>Doğrulama sonucu.</returns>
         [HttpPost("validate")]
         public async Task<IActionResult> ValidateTransfer([FromBody] CreateTransferDto transferDto)
         {
@@ -181,7 +213,11 @@ namespace BankingApp.API.Controllers
             }
         }
 
-        // New endpoint: validate by account numbers
+        /// <summary>
+        /// Hesap numaraları ile transfer ön doğrulaması yapar.
+        /// </summary>
+        /// <param name="transferDto">Transfer isteği.</param>
+        /// <returns>Doğrulama sonucu.</returns>
         [HttpPost("validate/by-account-number")]
         public async Task<IActionResult> ValidateTransferByAccountNumber([FromBody] CreateTransferByAccountNumberDto transferDto)
         {

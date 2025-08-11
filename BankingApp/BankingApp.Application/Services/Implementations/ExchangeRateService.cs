@@ -14,6 +14,9 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BankingApp.Application.Services.Implementations
 {
+    /// <summary>
+    /// Döviz kuru sorgulama ve güncelleme işlevlerini sağlar.
+    /// </summary>
     public class ExchangeRateService : IExchangeRateService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -35,6 +38,9 @@ namespace BankingApp.Application.Services.Implementations
             _vakifbankApiService = vakifbankApiService;
         }
 
+        /// <summary>
+        /// İki para birimi arasındaki kuru döner.
+        /// </summary>
         public async Task<ApiResponse<decimal>> GetExchangeRateAsync(string fromCurrency, string toCurrency)
         {
             try
@@ -84,6 +90,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Verilen tutarı hedef para birimine çevirir.
+        /// </summary>
         public async Task<ApiResponse<decimal>> ConvertAmountAsync(decimal amount, string fromCurrency, string toCurrency)
         {
             try
@@ -105,6 +114,9 @@ namespace BankingApp.Application.Services.Implementations
             }
         }
 
+        /// <summary>
+        /// Kurları harici API'lerden çekerek günceller.
+        /// </summary>
         public async Task UpdateExchangeRatesAsync()
         {
             try
@@ -156,6 +168,9 @@ namespace BankingApp.Application.Services.Implementations
 
 
 
+        /// <summary>
+        /// Sunum için seçili kurların güncel listesini döner.
+        /// </summary>
         public async Task<ApiResponse<ExchangeRatesResponseDto>> GetCurrentExchangeRatesAsync()
         {
             try

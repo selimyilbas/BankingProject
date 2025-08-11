@@ -4,6 +4,9 @@ import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ApiService } from './api';
 
+/**
+ * Kimlik doğrulama servisi: giriş, kayıt, oturum yönetimi ve kullanıcı durumu.
+ */
 @Injectable({
   providedIn: 'root'
 })
@@ -18,6 +21,7 @@ export class AuthService {
     }
   }
 
+  /** TCKN ve şifre ile giriş yapar. */
   login(tckn: string, password: string): Observable<boolean> {
     console.log('AuthService.login called with:', { tckn, password });
     
@@ -43,6 +47,7 @@ export class AuthService {
     );
   }
 
+  /** Yeni kullanıcı kaydı oluşturur. */
   register(userData: {
     firstName: string;
     lastName: string;
@@ -73,32 +78,35 @@ export class AuthService {
     );
   }
 
+  /** Oturumu kapatır ve yerel depolamayı temizler. */
   logout(): void {
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
   }
 
+  /** Kullanıcının giriş yapıp yapmadığını döner. */
   isLoggedIn(): boolean {
     return !!this.currentUserSubject.value;
   }
 
+  /** Mevcut kullanıcıyı döner. */
   getCurrentUser(): any {
     return this.currentUserSubject.value;
   }
 
-  // Helper method to get user display name
+  /** Kullanıcı görünen adını döner. */
   getUserDisplayName(): string {
     const user = this.getCurrentUser();
     return user ? user.name : '';
   }
 
-  // Helper method to get customer number
+  /** Kullanıcının müşteri numarasını döner. */
   getCustomerNumber(): string {
     const user = this.getCurrentUser();
     return user ? user.customerNumber : '';
   }
 
-  // Helper method to get customer ID
+  /** Kullanıcının müşteri kimliğini döner. */
   getCustomerId(): number {
     const user = this.getCurrentUser();
     return user ? user.customerId : 0;
