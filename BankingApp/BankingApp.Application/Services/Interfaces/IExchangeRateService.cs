@@ -11,7 +11,7 @@ namespace BankingApp.Application.Services.Interfaces
         /// <summary>
         /// İki para birimi arasındaki kuru döner.
         /// </summary>
-        Task<ApiResponse<decimal>> GetExchangeRateAsync(string fromCurrency, string toCurrency);
+        Task<ApiResponse<decimal>> GetExchangeRateAsync(string fromCurrency, string toCurrency, bool skipCache = false);
         /// <summary>
         /// Tutarı hedef para birimine çevirir.
         /// </summary>
@@ -23,6 +23,6 @@ namespace BankingApp.Application.Services.Interfaces
         /// <summary>
         /// Sunum için seçili kurların güncel değerlerini döner.
         /// </summary>
-        Task<ApiResponse<ExchangeRatesResponseDto>> GetCurrentExchangeRatesAsync();
+        Task<ApiResponse<ExchangeRatesResponseDto>> GetCurrentExchangeRatesAsync(bool skipCache = false);
     }
 }

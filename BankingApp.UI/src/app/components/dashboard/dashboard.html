@@ -97,6 +97,49 @@
           </div>
         </ng-template>
       </div>
+
+      <!-- Kripto (test amaçlı, yüksek oynaklık gösterimi) -->
+      <div class="exchange-rates-section">
+        <div class="section-header">
+          <h2>Kripto (Test) - {{ volatileSymbol }}</h2>
+          <div class="header-actions">
+            <button (click)="refreshVolatile()" class="refresh-btn" [disabled]="volatileLoading">
+              <i class="fas fa-sync-alt" [class.spinning]="volatileLoading"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="exchange-rates" *ngIf="!volatileLoading; else volatileLoadingTemplate">
+          <div class="rate-card">
+            <div class="currency-info">
+              <span class="currency-code">{{ volatileSymbol }}</span>
+              <span class="currency-name">Kaynak: Binance</span>
+            </div>
+            <div class="rate-values">
+              <div class="rate">
+                <span class="label">Fiyat (USDT)</span>
+                <span class="value">{{ volatilePrice ?? '-' }}</span>
+              </div>
+              <div class="rate">
+                <span class="label">24s%</span>
+                <span class="value" [ngStyle]="{color: (volatileChangePercent ?? 0) >= 0 ? 'green' : 'red'}">
+                  {{ volatileChangePercent !== null ? (volatileChangePercent | number:'1.2-2') + '%' : '-' }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="last-updated" *ngIf="volatileError">
+            <small style="color: red;">{{ volatileError }}</small>
+          </div>
+        </div>
+
+        <ng-template #volatileLoadingTemplate>
+          <div class="exchange-rates-loading">
+            <div class="vakifbank-spinner"></div>
+            <p>Kripto verisi yükleniyor...</p>
+          </div>
+        </ng-template>
+      </div>
     </div>
   
     <div class="total-balance-section">

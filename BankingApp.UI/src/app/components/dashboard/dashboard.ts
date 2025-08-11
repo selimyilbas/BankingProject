@@ -26,7 +26,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   exchangeRates: ExchangeRateDisplay[] = [];
   exchangeRatesLastUpdated: Date = new Date();
+  // Otomatik yenileme kaldırıldı; manuel butonla yenilenecek
   private refreshIntervalId: any | null = null;
+
+  // Kripto (test amaçlı, yüksek oynaklık): Binance public endpointlerinden çekilecek
+  volatileSymbol: string = 'PEPEUSDT';
+  volatilePrice: number | null = null;
+  volatileChangePercent: number | null = null;
+  volatileLoading: boolean = true;
+  volatileError: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -39,7 +47,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loadAccounts();
     this.loadExchangeRates();
-    this.refreshIntervalId = setInterval(() => this.loadExchangeRates(), 5000);
+    // Otomatik periyodik istek kaldırıldı
+    this.loadVolatileCoin();
   }
 
   loadAccounts() {
@@ -68,9 +77,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  loadExchangeRates() {
+  loadExchangeRates(skipCache: boolean = false) {
     this.exchangeRatesLoading = true;
-    this.exchangeRateService.getCurrentExchangeRates()
+    this.exchangeRateService.getCurrentExchangeRates(skipCache)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
@@ -78,28 +87,50 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.exchangeRatesLastUpdated = new Date(response.data.lastUpdated);
           } else {
             console.error('Failed to load exchange rates:', response.message);
-            // Fallback to hardcoded rates
-            this.exchangeRates = [
-              { currency: 'USD', currencyName: 'Amerikan Doları', buyRate: 32.45, sellRate: 32.55 },
-              { currency: 'EUR', currencyName: 'Euro', buyRate: 35.15, sellRate: 35.25 }
-            ];
+            // Canlı veri gelmezse loading'de kalmaya devam et
+            return;
           }
           this.exchangeRatesLoading = false;
         },
         error: (error) => {
           console.error('Error loading exchange rates:', error);
-          // Fallback to hardcoded rates
-          this.exchangeRates = [
-            { currency: 'USD', currencyName: 'Amerikan Doları', buyRate: 32.45, sellRate: 32.55 },
-            { currency: 'EUR', currencyName: 'Euro', buyRate: 35.15, sellRate: 35.25 }
-          ];
-          this.exchangeRatesLoading = false;
+          // Canlı veri gelmezse loading'de kalmaya devam et
+          return;
         }
       });
   }
 
   refreshExchangeRates() {
-    this.loadExchangeRates();
+    this.loadExchangeRates(true);
+  }
+
+  // Kripto test datası: Binance'ten PEPEUSDT fiyat ve 24s değişim
+  loadVolatileCoin() {
+    this.volatileLoading = true;
+    this.volatileError = null;
+    const priceUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${this.volatileSymbol}`;
+    const statsUrl = `https://api.binance.com/api/v3/ticker/24hr?symbol=${this.volatileSymbol}&type=MINI`;
+
+    Promise.all([
+      fetch(priceUrl).then(r => r.ok ? r.json() : Promise.reject(r.statusText)),
+      fetch(statsUrl).then(r => r.ok ? r.json() : Promise.reject(r.statusText))
+    ]).then(([priceJson, statsJson]) => {
+      const priceStr = priceJson?.price as string | undefined;
+      const changePctStr = (statsJson?.priceChangePercent ?? statsJson?.priceChangePercent) as string | undefined;
+      const parsedPrice = priceStr ? parseFloat(priceStr) : NaN;
+      const parsedChange = changePctStr ? parseFloat(changePctStr) : NaN;
+      this.volatilePrice = Number.isFinite(parsedPrice) ? parsedPrice : null;
+      this.volatileChangePercent = Number.isFinite(parsedChange) ? parsedChange : null;
+      this.volatileLoading = false;
+    }).catch(err => {
+      console.error('Binance volatile fetch error:', err);
+      this.volatileError = 'Kripto verisi alınamadı';
+      this.volatileLoading = false;
+    });
+  }
+
+  refreshVolatile() {
+    this.loadVolatileCoin();
   }
 
   ngOnDestroy(): void {

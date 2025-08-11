@@ -27,12 +27,12 @@ namespace BankingApp.API.Controllers
         /// </summary>
         /// <returns>Kur bilgilerini içeren ApiResponse.</returns>
         [HttpGet("current")]
-        public async Task<ActionResult<ApiResponse<ExchangeRatesResponseDto>>> GetCurrentExchangeRates()
+        public async Task<ActionResult<ApiResponse<ExchangeRatesResponseDto>>> GetCurrentExchangeRates([FromQuery] bool skipCache = false)
         {
             try
             {
                 _logger.LogInformation("Getting current exchange rates");
-                var result = await _exchangeRateService.GetCurrentExchangeRatesAsync();
+                var result = await _exchangeRateService.GetCurrentExchangeRatesAsync(skipCache);
                 
                 if (result.Success)
                     return Ok(result);
@@ -87,7 +87,7 @@ namespace BankingApp.API.Controllers
         /// <param name="toCurrency">Hedef para birimi (örn. TRY).</param>
         /// <returns>Kur bilgisini içeren ApiResponse.</returns>
         [HttpGet("rate")]
-        public async Task<ActionResult<ApiResponse<decimal>>> GetExchangeRate([FromQuery] string fromCurrency, [FromQuery] string toCurrency)
+        public async Task<ActionResult<ApiResponse<decimal>>> GetExchangeRate([FromQuery] string fromCurrency, [FromQuery] string toCurrency, [FromQuery] bool skipCache = false)
         {
             try
             {
@@ -98,7 +98,7 @@ namespace BankingApp.API.Controllers
                 }
 
                 _logger.LogInformation("Getting exchange rate from {FromCurrency} to {ToCurrency}", fromCurrency, toCurrency);
-                var result = await _exchangeRateService.GetExchangeRateAsync(fromCurrency, toCurrency);
+                var result = await _exchangeRateService.GetExchangeRateAsync(fromCurrency, toCurrency, skipCache);
                 
                 if (result.Success)
                     return Ok(result);

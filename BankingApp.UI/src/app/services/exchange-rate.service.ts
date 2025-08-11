@@ -26,17 +26,18 @@ export class ExchangeRateService {
   constructor(private api: ApiService) {}
 
   /** Güncel döviz kurlarını getirir. */
-  getCurrentExchangeRates(): Observable<ApiResponse<ExchangeRatesResponse>> {
-    return this.api.get<ApiResponse<ExchangeRatesResponse>>('/exchangerate/current');
+  getCurrentExchangeRates(skipCache: boolean = false): Observable<ApiResponse<ExchangeRatesResponse>> {
+    // Backend route token is [controller]=ExchangeRate → '/api/ExchangeRate/current'
+    return this.api.get<ApiResponse<ExchangeRatesResponse>>('/ExchangeRate/current', { skipCache });
   }
 
   /** İki para birimi arasındaki kuru getirir. */
-  getExchangeRate(fromCurrency: string, toCurrency: string): Observable<ApiResponse<number>> {
-    return this.api.get<ApiResponse<number>>(`/exchangerate/rate?fromCurrency=${fromCurrency}&toCurrency=${toCurrency}`);
+  getExchangeRate(fromCurrency: string, toCurrency: string, skipCache: boolean = false): Observable<ApiResponse<number>> {
+    return this.api.get<ApiResponse<number>>(`/ExchangeRate/rate`, { fromCurrency, toCurrency, skipCache });
   }
 
   /** Kur tablolarını günceller. */
   updateExchangeRates(): Observable<ApiResponse<any>> {
-    return this.api.post<ApiResponse<any>>('/exchangerate/update', {});
+    return this.api.post<ApiResponse<any>>('/ExchangeRate/update', {});
   }
 }

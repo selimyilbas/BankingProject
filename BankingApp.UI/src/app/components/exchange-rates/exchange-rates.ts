@@ -14,18 +14,18 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy {
   loading = true;
   lastUpdated: Date = new Date();
   private previousMap = new Map<string, { buy: number; sell: number }>();
+  // Otomatik yenileme kaldırıldı; manuel yenileme butonu ile istek atılacak
   private refreshIntervalId: any | null = null;
 
   constructor(private exchangeRateService: ExchangeRateService) {}
 
   ngOnInit() {
     this.loadExchangeRates();
-    this.refreshIntervalId = setInterval(() => this.loadExchangeRates(), 5000);
   }
 
-  loadExchangeRates() {
+  loadExchangeRates(skipCache: boolean = false) {
     this.loading = true;
-    this.exchangeRateService.getCurrentExchangeRates()
+    this.exchangeRateService.getCurrentExchangeRates(skipCache)
       .subscribe({
         next: (response) => {
           if (response.success && response.data) {
@@ -47,28 +47,21 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy {
             this.lastUpdated = new Date(response.data.lastUpdated);
           } else {
             console.error('Failed to load exchange rates:', response.message);
-            // Fallback to hardcoded rates
-            this.exchangeRates = [
-              { currency: 'USD', currencyName: 'Amerikan Doları', buyRate: 32.45, sellRate: 32.55 },
-              { currency: 'EUR', currencyName: 'Euro', buyRate: 35.15, sellRate: 35.25 }
-            ];
+            // Canlı veri gelmezse loading'de kalmaya devam et
+            return;
           }
           this.loading = false;
         },
         error: (error) => {
           console.error('Error loading exchange rates:', error);
-          // Fallback to hardcoded rates
-          this.exchangeRates = [
-            { currency: 'USD', currencyName: 'Amerikan Doları', buyRate: 32.45, sellRate: 32.55 },
-            { currency: 'EUR', currencyName: 'Euro', buyRate: 35.15, sellRate: 35.25 }
-          ];
-          this.loading = false;
+          // Canlı veri gelmezse loading'de kalmaya devam et
+          return;
         }
       });
   }
 
   refreshRates() {
-    this.loadExchangeRates();
+    this.loadExchangeRates(true);
   }
 
   ngOnDestroy(): void {
