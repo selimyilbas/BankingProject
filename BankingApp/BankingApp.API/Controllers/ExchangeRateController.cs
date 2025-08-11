@@ -10,11 +10,13 @@ namespace BankingApp.API.Controllers
     {
         private readonly IExchangeRateService _exchangeRateService;
         private readonly ILogger<ExchangeRateController> _logger;
+        private readonly BankingApp.Application.Services.Interfaces.IVakifbankApiService? _vakifbankApiService;
 
-        public ExchangeRateController(IExchangeRateService exchangeRateService, ILogger<ExchangeRateController> logger)
+        public ExchangeRateController(IExchangeRateService exchangeRateService, ILogger<ExchangeRateController> logger, BankingApp.Application.Services.Interfaces.IVakifbankApiService? vakifbankApiService = null)
         {
             _exchangeRateService = exchangeRateService;
             _logger = logger;
+            _vakifbankApiService = vakifbankApiService;
         }
 
         [HttpGet("current")]
@@ -34,6 +36,37 @@ namespace BankingApp.API.Controllers
                 _logger.LogError(ex, "Error getting current exchange rates");
                 var errorResponse = ApiResponse<ExchangeRatesResponseDto>.ErrorResponse("Internal server error");
                 return StatusCode(500, errorResponse);
+            }
+        }
+
+        // Diagnostic: Fetch today's USD/EUR TRY rates directly from VakifBank API
+        [HttpGet("vakifbank/today")]
+        public async Task<ActionResult<ApiResponse<object>>> GetVakifbankToday()
+        {
+            try
+            {
+                if (_vakifbankApiService == null)
+                {
+                    return BadRequest(ApiResponse<object>.ErrorResponse("Vakifbank API service not available"));
+                }
+
+                var nowUtc = DateTime.UtcNow;
+                var usd = await _vakifbankApiService.GetTryRatesAsync("USD", nowUtc);
+                var eur = await _vakifbankApiService.GetTryRatesAsync("EUR", nowUtc);
+
+                var data = new
+                {
+                    timestampUtc = nowUtc,
+                    usd = usd.HasValue ? new { purchase = usd.Value.buy, sale = usd.Value.sell } : null,
+                    eur = eur.HasValue ? new { purchase = eur.Value.buy, sale = eur.Value.sell } : null
+                };
+
+                return Ok(ApiResponse<object>.SuccessResponse(data, "Fetched directly from VakifBank API"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching VakifBank rates");
+                return StatusCode(500, ApiResponse<object>.ErrorResponse("Internal server error"));
             }
         }
 
