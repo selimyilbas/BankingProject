@@ -76,4 +76,45 @@
   <div class="disclaimer" *ngIf="!loading">
     <p><i class="fas fa-info-circle"></i> Kurlar sayfa açıldığında yüklenir. "Yenile" düğmesine basarak güncel kurları isteyebilirsiniz.</p>
   </div>
+
+  <!-- Kripto Kurları (Top 15) kısa liste -->
+  <div class="page-header" style="margin-top: 24px;">
+    <h2>Kripto Kurları (Top 15)</h2>
+  </div>
+  <div class="loading-container" *ngIf="cryptoLoading">
+    <div class="vakifbank-spinner"></div>
+    <p>Kripto kurları yükleniyor...</p>
+  </div>
+  <div class="rates-grid" *ngIf="!cryptoLoading">
+    <div class="rate-card" *ngFor="let c of topCrypto">
+      <div class="rate-header">
+        <div class="currency-info">
+          <span class="currency-code">{{ c.symbol }}</span>
+          <span class="currency-name">Kaynak: Binance</span>
+        </div>
+        <div class="currency-flag">
+          <i class="fas fa-coins"></i>
+        </div>
+      </div>
+      <div class="rate-details">
+        <div class="rate-row">
+          <div class="rate-type">
+            <span class="label">Fiyat</span>
+            <span class="sublabel">USDT</span>
+          </div>
+          <div class="rate-value buy">
+            <span class="value">{{ c.lastPrice | number:'1.6-6' }}</span>
+          </div>
+        </div>
+        <div class="rate-row">
+          <div class="rate-type">
+            <span class="label">24s%</span>
+          </div>
+          <div class="rate-value" [ngStyle]="{color: (c.priceChangePercent||0) >= 0 ? 'green' : 'red'}">
+            <span class="value">{{ c.priceChangePercent | number:'1.2-2' }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,0 +1,16 @@
+.rates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 15px;
+}
+.rate-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 15px;
+  background: #fff;
+}
+.rate-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.currency-code { font-weight: 700; }
+.rate-row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; }
+.rate-type .label { font-size: 12px; color: var(--vakifbank-gray); }
+

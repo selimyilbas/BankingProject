@@ -29,12 +29,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Otomatik yenileme kaldırıldı; manuel butonla yenilenecek
   private refreshIntervalId: any | null = null;
 
-  // Kripto (test amaçlı, yüksek oynaklık): Binance public endpointlerinden çekilecek
-  volatileSymbol: string = 'PEPEUSDT';
-  volatilePrice: number | null = null;
-  volatileChangePercent: number | null = null;
-  volatileLoading: boolean = true;
-  volatileError: string | null = null;
 
   constructor(
     private authService: AuthService,
@@ -48,7 +42,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadAccounts();
     this.loadExchangeRates();
     // Otomatik periyodik istek kaldırıldı
-    this.loadVolatileCoin();
+    // Kripto test bileşeni kaldırıldı
   }
 
   loadAccounts() {
@@ -104,34 +98,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadExchangeRates(true);
   }
 
-  // Kripto test datası: Binance'ten PEPEUSDT fiyat ve 24s değişim
-  loadVolatileCoin() {
-    this.volatileLoading = true;
-    this.volatileError = null;
-    const priceUrl = `https://api.binance.com/api/v3/ticker/price?symbol=${this.volatileSymbol}`;
-    const statsUrl = `https://api.binance.com/api/v3/ticker/24hr?symbol=${this.volatileSymbol}&type=MINI`;
-
-    Promise.all([
-      fetch(priceUrl).then(r => r.ok ? r.json() : Promise.reject(r.statusText)),
-      fetch(statsUrl).then(r => r.ok ? r.json() : Promise.reject(r.statusText))
-    ]).then(([priceJson, statsJson]) => {
-      const priceStr = priceJson?.price as string | undefined;
-      const changePctStr = (statsJson?.priceChangePercent ?? statsJson?.priceChangePercent) as string | undefined;
-      const parsedPrice = priceStr ? parseFloat(priceStr) : NaN;
-      const parsedChange = changePctStr ? parseFloat(changePctStr) : NaN;
-      this.volatilePrice = Number.isFinite(parsedPrice) ? parsedPrice : null;
-      this.volatileChangePercent = Number.isFinite(parsedChange) ? parsedChange : null;
-      this.volatileLoading = false;
-    }).catch(err => {
-      console.error('Binance volatile fetch error:', err);
-      this.volatileError = 'Kripto verisi alınamadı';
-      this.volatileLoading = false;
-    });
-  }
-
-  refreshVolatile() {
-    this.loadVolatileCoin();
-  }
+  // Kripto test alanı kaldırıldı
 
   ngOnDestroy(): void {
     if (this.refreshIntervalId) {

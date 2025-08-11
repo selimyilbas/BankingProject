@@ -17,10 +17,15 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy {
   // Otomatik yenileme kaldırıldı; manuel yenileme butonu ile istek atılacak
   private refreshIntervalId: any | null = null;
 
+  // Top 15 kripto (Binance)
+  cryptoLoading = true;
+  topCrypto: { symbol: string; lastPrice: number; priceChangePercent: number }[] = [];
+
   constructor(private exchangeRateService: ExchangeRateService) {}
 
   ngOnInit() {
     this.loadExchangeRates();
+    this.loadTopCrypto();
   }
 
   loadExchangeRates(skipCache: boolean = false) {
@@ -62,6 +67,31 @@ export class ExchangeRatesComponent implements OnInit, OnDestroy {
 
   refreshRates() {
     this.loadExchangeRates(true);
+    this.loadTopCrypto();
+  }
+
+  async loadTopCrypto() {
+    try {
+      this.cryptoLoading = true;
+      // En çok kullanılan 15 çiftten örnek set
+      const symbols = [
+        'BTCUSDT','ETHUSDT','BNBUSDT','XRPUSDT','SOLUSDT','ADAUSDT','DOGEUSDT','TRXUSDT','AVAXUSDT','DOTUSDT','MATICUSDT','LTCUSDT','LINKUSDT','BCHUSDT','ATOMUSDT'
+      ];
+      const url = 'https://api.binance.com/api/v3/ticker/24hr?symbols=' + encodeURIComponent(JSON.stringify(symbols)) + '&type=MINI';
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Binance 24hr fetch failed');
+      const json = await resp.json() as any[];
+      this.topCrypto = json.map(j => ({
+        symbol: j.symbol,
+        lastPrice: parseFloat(j.lastPrice),
+        priceChangePercent: parseFloat(j.priceChangePercent)
+      }));
+      this.cryptoLoading = false;
+    } catch (e) {
+      console.error('Error loading top crypto:', e);
+      this.topCrypto = [];
+      this.cryptoLoading = false;
+    }
   }
 
   ngOnDestroy(): void {
