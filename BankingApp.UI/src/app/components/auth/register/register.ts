@@ -35,12 +35,17 @@ export class RegisterComponent {
     this.error = '';
     this.success = false;
 
-        const request: RegisterRequest = {
+    // Ensure ISO date format (yyyy-MM-dd) for API
+    const isoDate = this.customer.dateOfBirth
+      ? new Date(this.customer.dateOfBirth).toISOString().slice(0, 10)
+      : '';
+
+    const request: RegisterRequest = {
       firstName: this.customer.firstName,
       lastName: this.customer.lastName,
       tckn: this.customer.tckn,
       password: this.customer.password,
-      dateOfBirth: this.customer.dateOfBirth
+      dateOfBirth: isoDate
     };
 
     this.authService.register(request).subscribe({

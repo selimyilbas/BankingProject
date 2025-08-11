@@ -16,12 +16,14 @@ namespace BankingApp.Application.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<CustomerService> _logger;
+        private readonly IEncryptionService? _encryptionService;
 
-        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<CustomerService> logger)
+        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<CustomerService> logger, IEncryptionService? encryptionService = null)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _encryptionService = encryptionService;
         }
 
         public async Task<ApiResponse<CustomerDto>> CreateCustomerAsync(CreateCustomerDto dto)
@@ -44,7 +46,8 @@ namespace BankingApp.Application.Services.Implementations
                 // Create new customer
                 var customer = _mapper.Map<Customer>(dto);
                 customer.CustomerNumber = customerNumber;
-                customer.Password = dto.Password; // Explicitly set password
+                // Encrypt password if service available (backward compatible if not configured)
+                customer.Password = _encryptionService != null ? _encryptionService.Encrypt(dto.Password) : dto.Password;
                 customer.IsActive = true;
                 customer.CreatedDate = DateTime.UtcNow;
 
@@ -194,9 +197,37 @@ namespace BankingApp.Application.Services.Implementations
             {
                 var customer = await _unitOfWork.Customers.GetByTCKNAsync(tckn);
                 
-                if (customer == null || customer.Password != password)
+                if (customer == null)
                 {
                     return null;
+                }
+
+                string stored = customer.Password ?? string.Empty;
+                bool isValid;
+                if (_encryptionService != null && _encryptionService.IsEncrypted(stored))
+                {
+                    isValid = _encryptionService.Decrypt(stored) == password;
+                }
+                else
+                {
+                    isValid = stored == password;
+                }
+
+                if (!isValid)
+                {
+                    return null;
+                }
+
+                // Lazy migrate if plain
+                if (_encryptionService != null && !_encryptionService.IsEncrypted(stored))
+                {
+                    try
+                    {
+                        customer.Password = _encryptionService.Encrypt(password);
+                        _unitOfWork.Customers.Update(customer);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                    catch { }
                 }
 
                 return _mapper.Map<CustomerDto>(customer);
@@ -251,12 +282,19 @@ namespace BankingApp.Application.Services.Implementations
                     return ApiResponse<bool>.ErrorResponse("Customer not found");
                 }
 
-                if (customer.Password != currentPassword)
+                string storedPassword = customer.Password ?? string.Empty;
+                string currentPlain = storedPassword;
+                if (_encryptionService != null && _encryptionService.IsEncrypted(storedPassword))
+                {
+                    currentPlain = _encryptionService.Decrypt(storedPassword);
+                }
+
+                if (currentPlain != currentPassword)
                 {
                     return ApiResponse<bool>.ErrorResponse("Current password is incorrect");
                 }
 
-                customer.Password = newPassword;
+                customer.Password = _encryptionService != null ? _encryptionService.Encrypt(newPassword) : newPassword;
                 _unitOfWork.Customers.Update(customer);
                 await _unitOfWork.SaveChangesAsync();
 

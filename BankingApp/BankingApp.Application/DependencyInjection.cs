@@ -21,6 +21,9 @@ namespace BankingApp.Application
             // Add HttpClient for ExchangeRateService
             services.AddHttpClient<ExchangeRateService>();
             services.AddMemoryCache();
+
+            // VakifBank API client
+            services.AddHttpClient<IVakifbankApiService, VakifbankApiService>();
             
             return services;
         }

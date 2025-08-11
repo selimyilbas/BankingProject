@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using BankingApp.Application.DTOs.Common;
 using BankingApp.Domain.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using BankingApp.Application.Services.Interfaces;
 
 namespace BankingApp.API.Controllers
 {
@@ -11,11 +12,13 @@ namespace BankingApp.API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AuthController> _logger;
+        private readonly IEncryptionService? _encryptionService;
 
-        public AuthController(IUnitOfWork unitOfWork, ILogger<AuthController> logger)
+        public AuthController(IUnitOfWork unitOfWork, ILogger<AuthController> logger, IEncryptionService? encryptionService = null)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _encryptionService = encryptionService;
         }
 
         [HttpPost("login")]
@@ -64,8 +67,19 @@ namespace BankingApp.API.Controllers
                     });
                 }
 
-                // Simple password comparison
-                var isValidPassword = customer.Password == loginDto.Password;
+                // Handle encrypted or plain password (backward compatible)
+                bool isValidPassword = false;
+                string storedPassword = customer.Password ?? string.Empty;
+
+                if (_encryptionService != null && _encryptionService.IsEncrypted(storedPassword))
+                {
+                    var decrypted = _encryptionService.Decrypt(storedPassword);
+                    isValidPassword = decrypted == loginDto.Password;
+                }
+                else
+                {
+                    isValidPassword = storedPassword == loginDto.Password;
+                }
                 
                 if (!isValidPassword)
                 {
@@ -75,6 +89,18 @@ namespace BankingApp.API.Controllers
                         Success = false,
                         Message = "Geçersiz TCKN veya şifre"
                     });
+                }
+
+                // Lazy migrate: if stored was plain and encryption is available, upgrade to encrypted
+                if (_encryptionService != null && !_encryptionService.IsEncrypted(storedPassword))
+                {
+                    try
+                    {
+                        customer.Password = _encryptionService.Encrypt(loginDto.Password);
+                        _unitOfWork.Customers.Update(customer);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                    catch { /* ignore migration errors to not block login */ }
                 }
 
                 // Return customer info in exact format
@@ -133,8 +159,12 @@ namespace BankingApp.API.Controllers
                     });
                 }
 
-                // Use plain password for testing
+                // Encrypt password if encryption service is available
                 var password = registerDto.Password;
+                if (_encryptionService != null)
+                {
+                    password = _encryptionService.Encrypt(registerDto.Password);
+                }
 
                 // Generate unique customer number
                 var customerNumber = await _unitOfWork.Customers.GenerateCustomerNumberAsync();
@@ -185,7 +215,8 @@ namespace BankingApp.API.Controllers
                 return StatusCode(500, new ApiResponse<object>
                 {
                     Success = false,
-                    Message = "Kayıt sırasında bir hata oluştu"
+                    Message = "Kayıt sırasında bir hata oluştu",
+                    Errors = new List<string> { ex.Message, ex.InnerException?.Message ?? string.Empty }
                 });
             }
         }

@@ -20,17 +20,19 @@ namespace BankingApp.Application.Services.Implementations
         private readonly ILogger<ExchangeRateService> _logger;
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _cache;
+        private readonly IVakifbankApiService? _vakifbankApiService;
         // Primary endpoint - Uses frankfurter.app for real-time currency data
         private const string PRIMARY_API_BASE_URL = "https://api.frankfurter.app/latest";
         // Fallback API endpoint in case the primary API fails
         private const string FALLBACK_API_BASE_URL = "https://api.exchangerate-api.com/v4/latest";
 
-        public ExchangeRateService(IUnitOfWork unitOfWork, ILogger<ExchangeRateService> logger, HttpClient httpClient, IMemoryCache cache)
+        public ExchangeRateService(IUnitOfWork unitOfWork, ILogger<ExchangeRateService> logger, HttpClient httpClient, IMemoryCache cache, IVakifbankApiService? vakifbankApiService = null)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _httpClient = httpClient;
             _cache = cache;
+            _vakifbankApiService = vakifbankApiService;
         }
 
         public async Task<ApiResponse<decimal>> GetExchangeRateAsync(string fromCurrency, string toCurrency)
@@ -249,6 +251,13 @@ namespace BankingApp.Application.Services.Implementations
 
         private async Task<decimal?> GetRateFromApiAsync(string fromCurrency, string toCurrency)
         {
+            // Try VakifBank API first for TRY pairs (USD/EUR)
+            var vbRate = await TryGetRateFromVakifbank(fromCurrency, toCurrency);
+            if (vbRate.HasValue)
+            {
+                return vbRate.Value;
+            }
+
             // Try primary API first (frankfurter.app)
             var rate = await TryGetRateFromApi(PRIMARY_API_BASE_URL, fromCurrency, toCurrency, "Primary API (frankfurter.app)");
             if (rate.HasValue)
@@ -259,6 +268,47 @@ namespace BankingApp.Application.Services.Implementations
             // Fallback to secondary API (exchangerate-api.com)
             rate = await TryGetRateFromApi(FALLBACK_API_BASE_URL, fromCurrency, toCurrency, "Fallback API (exchangerate-api.com)");
             return rate;
+        }
+
+        private async Task<decimal?> TryGetRateFromVakifbank(string fromCurrency, string toCurrency)
+        {
+            try
+            {
+                if (_vakifbankApiService == null)
+                {
+                    return null;
+                }
+
+                // Only direct pairs with TRY supported here
+                if (string.Equals(fromCurrency, "TRY", StringComparison.OrdinalIgnoreCase) &&
+                    (string.Equals(toCurrency, "USD", StringComparison.OrdinalIgnoreCase) || string.Equals(toCurrency, "EUR", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var result = await _vakifbankApiService.GetTryRatesAsync(toCurrency, DateTime.UtcNow);
+                    if (result.HasValue && result.Value.sell > 0)
+                    {
+                        // TRY -> FX: use bank SaleRate, so TRY/FX = 1 / sell
+                        return 1m / result.Value.sell;
+                    }
+                }
+
+                if (string.Equals(toCurrency, "TRY", StringComparison.OrdinalIgnoreCase) &&
+                    (string.Equals(fromCurrency, "USD", StringComparison.OrdinalIgnoreCase) || string.Equals(fromCurrency, "EUR", StringComparison.OrdinalIgnoreCase)))
+                {
+                    var result = await _vakifbankApiService.GetTryRatesAsync(fromCurrency, DateTime.UtcNow);
+                    if (result.HasValue)
+                    {
+                        // FX -> TRY: use bank PurchaseRate
+                        return result.Value.buy;
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "VakifBank rate fetch failed");
+                return null;
+            }
         }
 
         private async Task<decimal?> TryGetRateFromApi(string baseUrl, string fromCurrency, string toCurrency, string apiName)

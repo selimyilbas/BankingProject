@@ -30,7 +30,7 @@ namespace BankingApp.Infrastructure.Data.Configurations
 
             builder.Property(c => c.Password)
                 .IsRequired()
-                .HasMaxLength(100);
+                .HasMaxLength(256);
 
             builder.Property(c => c.DateOfBirth)
                 .IsRequired();

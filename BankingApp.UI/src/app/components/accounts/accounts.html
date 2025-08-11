@@ -1,10 +1,16 @@
 <div class="accounts-container">
   <div class="page-header">
     <h1>Hesaplarım</h1>
-    <button class="refresh-btn" (click)="refreshAccounts()" [disabled]="loading">
-      <i class="fas fa-sync-alt" [class.spinning]="loading"></i>
-      Yenile
-    </button>
+    <div class="header-actions">
+      <a routerLink="/account/create" class="btn btn-primary">
+        <i class="fas fa-plus"></i>
+        Yeni Hesap Aç
+      </a>
+      <button class="refresh-btn" (click)="refreshAccounts()" [disabled]="loading">
+        <i class="fas fa-sync-alt" [class.spinning]="loading"></i>
+        Yenile
+      </button>
+    </div>
   </div>
 
   <!-- Loading State -->

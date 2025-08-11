@@ -1,5 +1,7 @@
 using BankingApp.Infrastructure;
 using BankingApp.Application;
+using BankingApp.Application.Services.Interfaces;
+using BankingApp.Application.Services.Implementations;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,21 @@ builder.Services.AddAutoMapper(typeof(BankingApp.Application.Mappings.MappingPro
 // Add Infrastructure and Application services
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplicationServices();
+
+// Encryption service registration
+var encryptionKey = builder.Configuration["Encryption:Key"]; 
+var encryptionVersion = builder.Configuration["Encryption:Version"] ?? "v1";
+if (!string.IsNullOrWhiteSpace(encryptionKey))
+{
+    try
+    {
+        builder.Services.AddSingleton<IEncryptionService>(sp => new AesEncryptionService(encryptionKey, encryptionVersion));
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Encryption service not configured due to key error: {ex.Message}");
+    }
+}
 
 // Add CORS
 builder.Services.AddCors(options =>
