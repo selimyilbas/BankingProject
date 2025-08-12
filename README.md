@@ -69,23 +69,22 @@ Teknik başlıklar:
 Önkoşullar:
 - .NET 8 SDK, Node.js 18+, Docker Desktop
 
-1) Veritabanını başlatın
+1) Veritabanını başlatın (proje kök dizininden)
 ```bash
-cd /Users/selimyilbas/Desktop/BankingProject
 docker-compose up -d
 ```
 
 2) Backend’i çalıştırın
 ```bash
-cd /Users/selimyilbas/Desktop/BankingProject/BankingApp/BankingApp.API
+cd BankingApp/BankingApp.API
 dotnet restore
 dotnet run
 ```
 API: `http://localhost:5115` (Swagger: `/swagger`)
 
-3) Frontend’i çalıştırın
+3) Frontend’i çalıştırın (ayrı bir terminalde, proje kökünden)
 ```bash
-cd /Users/selimyilbas/Desktop/BankingProject/BankingApp.UI
+cd BankingApp.UI
 npm install
 ng serve --open
 ```
