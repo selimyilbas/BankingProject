@@ -384,25 +384,15 @@ Server=localhost,1433;Database=BankingDB;User Id=sa;Password=Selim@123456789;Tru
 
 | TCKN | Password | Name |
 |------|----------|------|
-| 12345678901 | 123456 | Ahmet Yılmaz |
-| 98765432109 | 123456 | Ayşe Kaya |
-| 11111111111 | 123456 | Test User |
+| 12345678901 | 123456 | Test User (1) |
+| 98765432109 | 123456 | Test User (2) |
+| 11111111111 | 123456 | Test User (3) |
 
 ### Notes
 
 - This is a learning project. Use proper password hashing, HTTPS, rate limiting, and input hardening for production. Authorization (roles) is not yet implemented.
 
-### Screenshots (Placeholder)
 
-- Dashboard (placeholder)
-
-![Dashboard](BankingApp.UI/src/assets/images/vakifbank-logo.jpg)
-
-- Transfer (placeholder)
-
-![Transfer](BankingApp.UI/src/assets/images/vakifbank-logo-sari-zemin.jpg)
-
-Will be replaced by real UI screenshots as the project evolves.
 
 ### Generate Swagger-based API Docs
 
