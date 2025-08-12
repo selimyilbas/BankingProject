@@ -253,6 +253,69 @@ npx @redocly/cli build-docs openapi.json -o docs.html
 
 ---
 
+## Ekran Görüntüleri
+
+Görselleri repo kökünde `docs/screenshots` klasörüne ekleyin. Aşağıdaki dosya adlarını kullanırsanız README otomatik olarak görüntüleyecektir.
+
+- `db-schema.png` — Veritabanı şeması ve saklı yordamlar görünümü
+- `ui-login.png` — Giriş ekranı
+- `ui-dashboard.png` — Ana sayfa ve özet paneller
+- `ui-accounts.png` — Hesaplarım ve toplam bakiyeler
+- `ui-deposit.png` — Para yatırma akışı
+- `ui-transfer-create.png` — Para transferi oluşturma (hesap seçimi ve doğrulama)
+- `ui-transfer-history.png` — Transfer geçmişi (kur ve dönüştürülen tutarlarla)
+- `ui-transaction-history.png` — İşlem geçmişi (tarih aralığı ve sayfalama)
+- `ui-exchange-rates.png` — Banka alış/satış kur ekranı (detaylı görünüm)
+- `ui-crypto-rates.png` — Kripto kurları (Binance kaynağı)
+- `ui-currency-converter.png` — Kur dönüştürücü (anlık kurla hesaplama)
+- `ui-profile.png` — Profil ve şifre değişikliği ekranı
+
+Dashboard
+
+![Dashboard](docs/screenshots/ui-dashboard.png)
+
+Hesaplarım
+
+![Hesaplar](docs/screenshots/ui-accounts.png)
+
+Para Yatırma
+
+![Para Yatırma](docs/screenshots/ui-deposit.png)
+
+Para Transferi
+
+![Transfer](docs/screenshots/ui-transfer-create.png)
+
+Transfer Geçmişi
+
+![Transfer Geçmişi](docs/screenshots/ui-transfer-history.png)
+
+İşlem Geçmişi
+
+![İşlem Geçmişi](docs/screenshots/ui-transaction-history.png)
+
+Döviz Kurları
+
+![Döviz Kurları](docs/screenshots/ui-exchange-rates.png)
+
+Kripto Kurları
+
+![Kripto Kurları](docs/screenshots/ui-crypto-rates.png)
+
+Kur Dönüştürücü
+
+![Kur Dönüştürücü](docs/screenshots/ui-currency-converter.png)
+
+Profil
+
+![Profil](docs/screenshots/ui-profile.png)
+
+Veritabanı Şeması
+
+![Veritabanı Şeması](docs/screenshots/db-schema.png)
+
+---
+
 ## English Version
 
 ### Overview
