@@ -100,7 +100,7 @@ Docker SQL Server konteyner adı: `banking-sqlserver` (port `1433`).
 
 - ConnectionStrings.DefaultConnection:
 ```
-Server=localhost,1433;Database=BankingDB;User Id=sa;Password=Selim@123456789;TrustServerCertificate=True;MultipleActiveResultSets=true
+Server=localhost,1433;Database=BankingDB;User Id=YourID;Password=YourPassword;TrustServerCertificate=True;MultipleActiveResultSets=true
 ```
 - CORS: `Program.cs` içinde `http://localhost:4200` kökenine izin verilir.
 - Encryption (opsiyonel):
