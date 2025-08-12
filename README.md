@@ -1,172 +1,324 @@
-#  VakıfBank Banking Application
+## VakıfBank Banking Application
 
-A full-stack banking application developed as an internship project, featuring real-time exchange rates, multi-currency accounts, secure transactions, and modern UI/UX design.
+Modern bir full-stack bankacılık uygulaması. Çoklu para birimli hesaplar, para yatırma/transfer, döviz kurları ve temiz mimari ile uçtan uca bir örnek yapı sunar.
 
-> 📈 **Son Güncellemeler**: Para transfer sistemi optimize edildi ve bakiye güncellemeleri gerçek zamanlı hale getirildi.
+- .NET 8 (Clean Architecture, DDD, Repository + Unit of Work)
+- Angular 17+ (Standalone Components – NgModule yok)
+- SQL Server 2022 (Docker)
 
-![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
-![.NET](https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=.net&logoColor=white)
-![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
-![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoft-sql-server&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+---
 
-## 📋 Table of Contents
+### İçindekiler
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [API Documentation](#-api-documentation)
-- [Database Schema](#-database-schema)
-- [Exchange Rates Integration](#-exchange-rates-integration)
-- [Screenshots](#-screenshots)
-- [Contributing](#-contributing)
+- **Özellikler ve Kurallar**
+- **Mimari ve Proje Yapısı**
+- **Kurulum ve Çalıştırma**
+- **Konfigürasyon (appsettings, CORS, dış servisler)**
+- **Domain Kuralları**
+- **API Tasarımı (ApiResponse) ve Uç Noktalar**
+- **Frontend Yapısı**
+- **Test Kullanıcıları**
+- **Geliştirme Notları ve Kısıtlar**
+- **English Version (at the bottom)**
 
-## ✨ Features
+---
 
-### Core Banking Features
-- **👤 Customer Management**
-  - Customer registration with TCKN validation
-  - Profile management
-  - Secure authentication
+## Özellikler ve Kurallar
 
-- **💳 Multi-Currency Accounts**
-  - Support for TL, EUR, and USD accounts
-  - Automatic account number generation
-  - Real-time balance tracking
+- **Müşteri Yönetimi**: Kayıt, güncelleme, TCKN ile arama, hesaplarla birlikte görüntüleme
+- **Hesaplar (TL, EUR, USD)**: Otomatik hesap numarası, bakiye görüntüleme, durum değiştirme
+- **İşlemler**: Para yatırma ve işlem geçmişi, tarih aralığı ve sayfalama
+- **Transfer**: Hesap kimliği veya hesap numarasıyla; döviz dönüşümlü
+- **Döviz Kurları**: Anlık kurlar, opsiyonel VakıfBank sandbox entegrasyonu
+- **Standart Yanıt**: Tüm endpoint’ler `ApiResponse<T>` döner (JSON anahtarları lowercase: `success`, `message`, `data`, `errors`)
 
-- **💰 Transactions**
-  - Deposit operations
-  - Money transfers between accounts
-  - Automatic currency conversion
-  - Transaction history
+Notlar:
+- Şifreler test amaçlı düz metin olarak saklanır. `Encryption:Key` verilirse AES‑GCM ile şifreleme etkinleşir ve girişte “lazy migration” yapılır.
+- CORS, Angular `http://localhost:4200` için açıktır.
 
-- **💱 Real-Time Exchange Rates**
-  - Live rates from exchangerate-api.com
-  - USD/TRY and EUR/TRY rates
-  - Buy/Sell spread calculations
-  - Manual refresh capability
+---
 
-### Technical Features
-- **🔐 Security**
-  - JWT-based authentication
-  - CORS configuration
-  - Input validation
-
-- **🏗️ Architecture**
-  - Clean Architecture implementation
-  - Domain-Driven Design (DDD)
-  - Repository Pattern
-  - Unit of Work Pattern
-
-- **🎨 Modern UI/UX**
-  - Responsive design
-  - VakıfBank branding
-  - Real-time updates
-  - Loading states and error handling
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Framework**: .NET 8.0
-- **Architecture**: Clean Architecture
-- **Database**: SQL Server 2022
-- **ORM**: Entity Framework Core
-- **Authentication**: JWT Bearer
-- **API Documentation**: Swagger/OpenAPI
-
-### Frontend
-- **Framework**: Angular 17+
-- **Components**: Standalone Components (No Modules)
-- **Styling**: Custom CSS with VakıfBank theme
-- **HTTP Client**: Angular HttpClient
-- **Routing**: Angular Router
-
-### Infrastructure
-- **Containerization**: Docker
-- **Database Management**: Docker Compose
-- **External APIs**: exchangerate-api.com
-
-## 🏛️ Architecture
+## Mimari ve Proje Yapısı
 
 ```
 BankingProject/
 ├── BankingApp/                      # Backend (.NET)
-│   ├── BankingApp.API/             # Web API Layer
-│   │   ├── Controllers/            # API Endpoints
-│   │   ├── Program.cs             # Application Entry Point
-│   │   └── appsettings.json       # Configuration
-│   ├── BankingApp.Application/     # Business Logic Layer
-│   │   ├── DTOs/                  # Data Transfer Objects
-│   │   ├── Services/              # Business Services
-│   │   └── Mappings/              # AutoMapper Profiles
-│   ├── BankingApp.Domain/          # Domain Layer
-│   │   ├── Entities/              # Domain Entities
-│   │   └── Interfaces/            # Domain Contracts
-│   ├── BankingApp.Infrastructure/  # Data Access Layer
-│   │   ├── Data/                  # DbContext & Configurations
-│   │   └── Repositories/          # Repository Implementations
-│   └── BankingApp.Common/          # Shared Utilities
-├── BankingApp.UI/                  # Frontend (Angular)
-│   └── src/
-│       └── app/
-│           ├── components/        # UI Components
-│           ├── services/          # Angular Services
-│           └── models/            # TypeScript Models
-├── database/                       # Database Scripts
-└── docker-compose.yml             # Docker Configuration
+│   ├── BankingApp.API/             # Web API
+│   │   ├── Controllers/            # Auth, Customer, Account, Transaction, Transfer, ExchangeRate
+│   │   ├── Program.cs              # Giriş noktası (Swagger, CORS, DI)
+│   │   └── appsettings.json        # Konfigürasyon
+│   ├── BankingApp.Application/     # Uygulama katmanı (DTO, Services, Mappings)
+│   ├── BankingApp.Domain/          # Domain (Entities, Interfaces)
+│   ├── BankingApp.Infrastructure/  # EF Core, DbContext, Repositories
+│   └── BankingApp.Common/          # Ortak bileşenler
+├── BankingApp.UI/                  # Frontend (Angular 17+)
+│   └── src/app/{components,services,models}
+├── database/                       # SQL betikleri
+└── docker-compose.yml              # SQL Server 2022 (1433)
 ```
 
-## 🚀 Getting Started
+Teknik başlıklar:
+- Swagger sadece Development’ta aktiftir (`http://localhost:5115/swagger`).
+- AutoMapper profilleri `Application` katmanında tanımlıdır.
+- Repository + Unit of Work deseni `Infrastructure` içinde uygulanır.
 
-### Prerequisites
-- .NET 8.0 SDK
-- Node.js 18+ and npm
-- Docker Desktop
-- SQL Server Management Studio (optional)
+---
 
-### 1. Clone the Repository
+## Kurulum ve Çalıştırma
+
+Önkoşullar:
+- .NET 8 SDK, Node.js 18+, Docker Desktop
+
+1) Veritabanını başlatın
 ```bash
-git clone https://github.com/selimyilbas/BankingProject.git
-cd BankingProject
-```
-
-### 2. Start SQL Server Database
-```bash
+cd /Users/selimyilbas/Desktop/BankingProject
 docker-compose up -d
 ```
 
-### 3. Setup Backend
-
+2) Backend’i çalıştırın
 ```bash
-# Navigate to backend directory
-cd BankingApp/BankingApp.API
-
-# Restore packages
+cd /Users/selimyilbas/Desktop/BankingProject/BankingApp/BankingApp.API
 dotnet restore
-
-# Run the API
 dotnet run
 ```
+API: `http://localhost:5115` (Swagger: `/swagger`)
 
-The API will be available at `http://localhost:5115`
-
-### 4. Setup Frontend
-
+3) Frontend’i çalıştırın
 ```bash
-# Navigate to frontend directory
-cd BankingApp.UI
-
-# Install dependencies
+cd /Users/selimyilbas/Desktop/BankingProject/BankingApp.UI
 npm install
+ng serve --open
+```
+UI: `http://localhost:4200`
 
-# Start the development server
-ng serve
+Docker SQL Server konteyner adı: `banking-sqlserver` (port `1433`).
+
+---
+
+## Konfigürasyon
+
+`BankingApp/BankingApp.API/appsettings.json` önemli alanlar:
+
+- ConnectionStrings.DefaultConnection:
+```
+Server=localhost,1433;Database=BankingDB;User Id=sa;Password=Selim@123456789;TrustServerCertificate=True;MultipleActiveResultSets=true
+```
+- CORS: `Program.cs` içinde `http://localhost:4200` kökenine izin verilir.
+- Encryption (opsiyonel):
+  - `Encryption:Key` (Base64) ve `Encryption:Version` (örn. `v1`)
+  - Anahtar girilirse `AesEncryptionService` kaydedilir ve login sırasında düz metin şifreler şifrelenir.
+- Dış Servisler:
+  - `VakifbankApi`: `BaseUrl`, `TokenUrl`, `ClientId`, `ClientSecret`, `UseVakifbankForFx` (varsayılan: false)
+  - `ExchangeRateApi:ApiKey`: Üçüncü parti kur servisi anahtarı
+
+Frontend API tabanı: `BankingApp.UI/src/app/services/api.ts` içinde `http://localhost:5115/api`.
+
+---
+
+## Domain Kuralları
+
+- Para birimleri: yalnızca TL, EUR, USD
+- Hesap numarası başlangıçları: TL → 1, EUR → 2, USD → 3
+- TCKN: 11 haneli doğrulama (öğrenme amaçlı basit kontrol)
+
+---
+
+## API Tasarımı ve Standart Yanıt
+
+Tüm endpoint’ler `ApiResponse<T>` döndürür. JSON anahtarları lowercase’dır.
+
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": { /* ... */ },
+  "errors": []
+}
+``;
+
+---
+
+## Uç Noktalar (Özet)
+
+Auth (`/api/auth`)
+- POST `login`
+- POST `register`
+
+Customer (`/api/customer`)
+- POST `` (oluştur)
+- GET `{customerId}`
+- GET `by-number/{customerNumber}`
+- GET `by-tckn/{tckn}`
+- GET `` (sayfalı liste; `pageNumber`, `pageSize`)
+- GET `{customerId}/with-accounts`
+- PUT `{customerId}`
+- POST `{customerId}/change-password`
+- POST `validate-tckn`
+
+Account (`/api/account`)
+- POST `` (Create)
+- GET `{accountId}`
+- GET `by-number/{accountNumber}`
+- GET `customer/{customerId}`
+- GET `balance/{accountNumber}`
+- PUT `{accountId}/status` (aktif/pasif)
+
+Transaction (`/api/transaction`)
+- POST `deposit`
+- GET `account/{accountId}`
+- GET `account/{accountId}/date-range?startDate=...&endDate=...`
+- GET `account/{accountId}/paged?pageNumber=1&pageSize=10`
+
+Transfer (`/api/transfer`)
+- POST `` (kimliklerle)
+- POST `by-account-number` (numaralarla)
+- GET `account/{accountId}`
+- GET `customer/{customerId}`
+- GET `{transferId}`
+- POST `validate`
+- POST `validate/by-account-number`
+
+ExchangeRate (`/api/exchangerate`)
+- GET `current?skipCache=false`
+- GET `rate?fromCurrency=USD&toCurrency=TRY&skipCache=false`
+- GET `vakifbank/today`
+- POST `update`
+
+Not: Swagger’dan tüm şema ve örnekleri inceleyebilirsiniz.
+
+---
+
+## Frontend Yapısı (Angular 17+)
+
+- Standalone bileşenler (NgModule yok). Her bileşen `standalone: true`.
+- Servisler: `src/app/services/*` (örn. `api.ts`, `account.service.ts`, `transfer.service.ts`)
+- Modeller: `src/app/models/*` (örn. `api-response.model.ts`)
+- API tabanı: `http://localhost:5115/api`
+
+---
+
+## Test Kullanıcıları
+
+| TCKN | Şifre | Ad |
+|------|-------|----|
+| 12345678901 | 123456 | Ahmet Yılmaz |
+| 98765432109 | 123456 | Ayşe Kaya |
+| 11111111111 | 123456 | Test User |
+
+---
+
+## Geliştirme Notları ve Kısıtlar
+
+- Bu proje öğrenme/test amaçlıdır; güvenlik basitleştirilmiştir.
+- Şifre saklama düz metindir (opsiyonel AES şifreleme mevcuttur). Üretimde uygun hashing kullanılmalıdır.
+- HTTPS, hız sınırlama, girdi doğrulama ve hataya dayanıklılık üretimde zorunludur.
+- Rol bazlı yetkilendirme henüz eklenmemiştir.
+- Döviz kurları servisinde önbellek ve geri dönüş mekanizması bulunur; `UseVakifbankForFx=false` varsayılanıdır.
+
+---
+
+### Ekran Görüntüleri (Örnek/Placeholder)
+
+- Dashboard görünümü (placeholder)
+
+![Dashboard](BankingApp.UI/src/assets/images/vakifbank-logo.jpg)
+
+- Transfer görünümü (placeholder)
+
+![Transfer](BankingApp.UI/src/assets/images/vakifbank-logo-sari-zemin.jpg)
+
+Not: Proje ilerledikçe gerçek ekran görüntüleri ile güncellenecektir.
+
+---
+
+### Swagger’dan Otomatik Endpoint Dökümü (README’ye bağlamak için)
+
+Aşağıdaki adımlarla canlı çalışan API’dan OpenAPI şemasını alıp Markdown döküm üretebilirsiniz:
+
+1) OpenAPI şemasını indir
+```bash
+curl -s http://localhost:5115/swagger/v1/swagger.json -o openapi.json
 ```
 
-The application will be available at `http://localhost:4200`
+2) Markdown çıktı üret (API.md)
+```bash
+npx swagger-markdown -i openapi.json -o API.md
+```
 
-### 5. Default Test Users
+Alternatif HTML doküm: 
+```bash
+npx @redocly/cli build-docs openapi.json -o docs.html
+```
+
+3) README’ye bağlantı ekleyin: `[Ayrıntılı API Dökümü](API.md)`
+
+---
+
+## English Version
+
+### Overview
+
+Full‑stack banking application demonstrating Clean Architecture, DDD, multi‑currency accounts, deposits, transfers (with FX), and live exchange rates.
+
+- Backend: .NET 8, EF Core, Repository + Unit of Work, AutoMapper, Swagger
+- Frontend: Angular 17+ (Standalone Components), HttpClient, Router
+- Database: SQL Server 2022 (Docker, port 1433)
+
+### Project Layout
+
+```
+BankingApp (API, Application, Domain, Infrastructure, Common)
+BankingApp.UI (Angular app)
+database (SQL scripts)
+docker-compose.yml (SQL Server)
+```
+
+### Run locally
+
+```bash
+# DB
+cd /Users/selimyilbas/Desktop/BankingProject
+docker-compose up -d
+
+# API
+cd /Users/selimyilbas/Desktop/BankingProject/BankingApp/BankingApp.API
+dotnet restore && dotnet run
+# -> http://localhost:5115 (Swagger: /swagger)
+
+# UI
+cd /Users/selimyilbas/Desktop/BankingProject/BankingApp.UI
+npm i && ng serve --open
+# -> http://localhost:4200
+```
+
+### Configuration
+
+- Connection string (SQL Server):
+```
+Server=localhost,1433;Database=BankingDB;User Id=sa;Password=Selim@123456789;TrustServerCertificate=True
+```
+- CORS: `http://localhost:4200`
+- Optional AES encryption: set `Encryption:Key` and `Encryption:Version` in `appsettings.json`
+- External APIs: `VakifbankApi.*`, `ExchangeRateApi.ApiKey`
+- Frontend API base: `http://localhost:5115/api`
+
+### Domain rules
+
+- Currencies: TL, EUR, USD
+- Account numbers: TL→1, EUR→2, USD→3 prefixes
+
+### API design and endpoints
+
+- Standard response wrapper `ApiResponse<T>` with lowercase JSON keys.
+- Key endpoints:
+  - Auth: POST `/api/auth/login`, `/api/auth/register`
+  - Customer: CRUD, lookups by id/number/TCKN, password change, paged list
+  - Account: create, get by id/number/customer, balance, status update
+  - Transaction: deposit, account history, date‑range, paged
+  - Transfer: create (by ids or account numbers), validate, history by account/customer, get by id
+  - ExchangeRate: `current`, `rate`, `vakifbank/today`, `update`
+
+### Test users
 
 | TCKN | Password | Name |
 |------|----------|------|
@@ -174,146 +326,34 @@ The application will be available at `http://localhost:4200`
 | 98765432109 | 123456 | Ayşe Kaya |
 | 11111111111 | 123456 | Test User |
 
-## 📡 API Documentation
+### Notes
 
-### Authentication
-```http
-POST /api/auth/login
-Content-Type: application/json
+- This is a learning project. Use proper password hashing, HTTPS, rate limiting, and input hardening for production. Authorization (roles) is not yet implemented.
 
-{
-  "tckn": "12345678901",
-  "password": "123456"
-}
+### Screenshots (Placeholder)
+
+- Dashboard (placeholder)
+
+![Dashboard](BankingApp.UI/src/assets/images/vakifbank-logo.jpg)
+
+- Transfer (placeholder)
+
+![Transfer](BankingApp.UI/src/assets/images/vakifbank-logo-sari-zemin.jpg)
+
+Will be replaced by real UI screenshots as the project evolves.
+
+### Generate Swagger-based API Docs
+
+```bash
+# 1) Fetch OpenAPI JSON
+curl -s http://localhost:5115/swagger/v1/swagger.json -o openapi.json
+
+# 2) Produce Markdown (API.md)
+npx swagger-markdown -i openapi.json -o API.md
+
+# (Optional) Produce HTML docs
+npx @redocly/cli build-docs openapi.json -o docs.html
 ```
 
-### Exchange Rates
-```http
-GET /api/exchangerate/current
-```
+Then link from README: `[Detailed API Docs](API.md)`
 
-Response:
-```json
-{
-  "success": true,
-  "message": "Operation successful",
-  "data": {
-    "rates": [
-      {
-        "currency": "USD",
-        "currencyName": "Amerikan Doları",
-        "buyRate": 40.4766,
-        "sellRate": 40.8834
-      },
-      {
-        "currency": "EUR",
-        "currencyName": "Euro",
-        "buyRate": 46.8247,
-        "sellRate": 47.2953
-      }
-    ],
-    "lastUpdated": "2025-08-06T06:46:13.094859Z"
-  }
-}
-```
-
-### Create Account
-```http
-POST /api/account
-Content-Type: application/json
-Authorization: Bearer {token}
-
-{
-  "customerId": 1,
-  "currency": "USD",
-  "accountName": "My USD Account"
-}
-```
-
-### Money Transfer
-```http
-POST /api/transfer
-Content-Type: application/json
-Authorization: Bearer {token}
-
-{
-  "fromAccountId": 1,
-  "toAccountId": 2,
-  "amount": 100,
-  "description": "Test transfer"
-}
-```
-
-## 🗄️ Database Schema
-
-### Core Tables
-- **Customers**: Customer information with TCKN
-- **Accounts**: Multi-currency account details
-- **Transactions**: All financial transactions
-- **Transfers**: Money transfer records
-- **ExchangeRateHistory**: Historical exchange rates
-
-### Account Number Format
-- TL accounts: Start with 1 (e.g., 100000000001)
-- EUR accounts: Start with 2 (e.g., 200000000001)
-- USD accounts: Start with 3 (e.g., 300000000001)
-
-## 💱 Exchange Rates Integration
-
-The application integrates with [exchangerate-api.com](https://www.exchangerate-api.com/) for real-time currency rates.
-
-### Features
-- **Real-time Updates**: Fetches live rates from API
-- **Fallback Mechanism**: Uses database cache if API fails
-- **Spread Calculation**: Applies 0.5% spread for buy/sell rates
-- **Currency Support**: USD/TRY and EUR/TRY pairs
-
-### Implementation Details
-```csharp
-// Direct API call without caching
-var url = $"https://api.exchangerate-api.com/v4/latest/{currency}";
-var response = await _httpClient.GetAsync(url);
-// Parse and apply spread calculations
-```
-
-## 📸 Screenshots
-
-### Dashboard
-- Account overview with real-time balances
-- Live exchange rates display
-- Quick action buttons
-- Transaction summary
-
-### Money Transfer
-- Multi-currency transfer support
-- Automatic currency conversion
-- Real-time rate display
-- Transfer confirmation
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is developed as an internship project for VakıfBank.
-
-## 🙏 Acknowledgments
-
-- VakıfBank for the internship opportunity
-- [exchangerate-api.com](https://www.exchangerate-api.com/) for providing free exchange rate API
-- Angular and .NET communities for excellent documentation
-
----
-
-**Note**: This is a test/learning project. For production use, implement proper security measures including:
-- Password hashing (currently using plain text for testing)
-- HTTPS enforcement
-- Rate limiting
-- Input sanitization
-- Proper error handling
-- MERNIS integration for real TCKN validation
